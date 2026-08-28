@@ -3,6 +3,7 @@ import httpx
 from loguru import logger
 
 from app.core.config import get_settings
+from app.services.transcript import wbi
 
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/124 Safari/537.36"
 
@@ -34,11 +35,12 @@ async def fetch_subtitle(bvid: str) -> str | None:
         "Referer": f"https://www.bilibili.com/video/{bvid}",
         "Cookie": f"SESSDATA={settings.bilibili_sessdata}",
     }
+    # player/wbi/v2 要求 wbi 签名（T1.4）
+    signed = wbi.sign({"bvid": bvid, "cid": cid}, await wbi.get_mixin_key())
     async with httpx.AsyncClient(timeout=10, headers=headers) as client:
-        # TODO(T1.4): player 接口的 AI 字幕列表需要 wbi 签名（w_rid），签名算法实现后补齐
         resp = await client.get(
             "https://api.bilibili.com/x/player/wbi/v2",
-            params={"bvid": bvid, "cid": cid},
+            params=signed,
         )
         if resp.status_code != 200 or resp.json().get("code") != 0:
             logger.warning("player api failed: bvid={}", bvid)

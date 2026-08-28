@@ -8,7 +8,14 @@ from app.core.config import get_settings
 
 settings = get_settings()
 
-engine = create_engine(settings.database_url, pool_pre_ping=True, pool_recycle=3600)
+_connect_args = {}
+if settings.database_url.startswith("sqlite"):
+    # FastAPI 多线程访问 SQLite 需要
+    _connect_args = {"check_same_thread": False}
+
+engine = create_engine(
+    settings.database_url, pool_pre_ping=True, pool_recycle=3600, connect_args=_connect_args
+)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 
 

@@ -1,5 +1,5 @@
 from sqlalchemy import BIGINT, CHAR, ForeignKey, SmallInteger, String
-from sqlalchemy.dialects.mysql import JSON
+from sqlalchemy import JSON
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, TimestampMixin

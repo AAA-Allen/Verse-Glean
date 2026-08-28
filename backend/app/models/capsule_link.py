@@ -12,7 +12,7 @@ class CapsuleLink(Base, IdMixin, TimestampMixin):
     __tablename__ = "capsule_links"
     __table_args__ = (
         UniqueConstraint("source_id", "target_id", name="uk_edge"),
-        Index("idx_target", "target_id"),
+        Index("idx_links_target", "target_id"),
     )
 
     source_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("capsules.id", ondelete="CASCADE"))

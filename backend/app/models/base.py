@@ -1,7 +1,7 @@
 """ORM 基类与通用字段，表结构定义见 docs/DATABASE.md。"""
 from datetime import datetime
 
-from sqlalchemy import BIGINT, DateTime, func
+from sqlalchemy import BIGINT, BigInteger, DateTime, Integer, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -9,8 +9,12 @@ class Base(DeclarativeBase):
     pass
 
 
+# SQLite 仅 INTEGER PRIMARY KEY 自增（rowid 别名），MySQL 用 BIGINT
+PkBigInt = BigInteger().with_variant(Integer, "sqlite")
+
+
 class IdMixin:
-    id: Mapped[int] = mapped_column(BIGINT, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(PkBigInt, primary_key=True, autoincrement=True)
 
 
 class TimestampMixin:

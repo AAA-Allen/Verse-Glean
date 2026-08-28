@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import CHAR, BIGINT, ForeignKey, Index, String, UniqueConstraint
-from sqlalchemy.dialects.mysql import JSON
+from sqlalchemy import JSON
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, IdMixin, SoftDeleteMixin, TimestampMixin
@@ -12,8 +12,8 @@ class Capsule(Base, IdMixin, TimestampMixin, SoftDeleteMixin):
     __table_args__ = (
         # 1:0..1 —— 一个视频当前生效一个胶囊（重提取覆盖更新）
         UniqueConstraint("video_id", name="uk_video"),
-        Index("idx_user_created", "user_id", "created_at"),
-        Index("idx_user_category", "user_id", "category"),
+        Index("idx_capsules_user_created", "user_id", "created_at"),
+        Index("idx_capsules_user_category", "user_id", "category"),
     )
 
     video_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("videos.id"), nullable=False)

@@ -53,14 +53,14 @@
 
 | ID | 任务 | 负责人 | 依赖 | 工时 | 状态 |
 | --- | --- | --- | --- | --- | --- |
-| T1.1 | 配置/日志/统一响应/鉴权依赖注入 | 后端 | T0.2 | 1 | ☐ |
-| T1.2 | 建模与首版迁移（users/videos/tasks/capsules/tags/embeddings/links） | 后端 | T1.1 | 1.5 | ☐ |
-| T1.3 | resolver：口令/短链解析 + B 站元数据 + 幂等查重 | AI | T1.1 | 2 | ☐ |
-| T1.4 | transcript L1：B 站字幕 API（SESSDATA+wbi） | AI | T1.3 | 1.5 | ☐ |
-| T1.5 | transcript L2：yt-dlp + ffmpeg + FunASR 本地转写 | AI | T1.4 | 2.5 | ☐ |
-| T1.6 | extractor：垂类路由 + 3 份 Few-Shot 模板 + pydantic 重试 | 负责人 | T1.1 | 3 | ☐ |
-| T1.7 | 任务状态机执行器（异步、中间态自愈）+ 提取/查询 API | 后端 | T1.3–T1.6 | 2 | ☐ |
-| T1.8 | `extract_cli.py` 端到端验证脚本 + service 单测 | 后端 | T1.7 | 1 | ☐ |
+| T1.1 | 配置/日志/统一响应/鉴权依赖注入 | 后端 | T0.2 | 1 || ☑ |
+| T1.2 | 建模与首版迁移（users/videos/tasks/capsules/tags/embeddings/links） | 后端 | T1.1 | 1.5 || ☑ |
+| T1.3 | resolver：口令/短链解析 + B 站元数据 + 幂等查重 | AI | T1.1 | 2 || ☑ |
+| T1.4 | transcript L1：B 站字幕 API（SESSDATA+wbi） | AI | T1.3 | 1.5 || ◐ |
+| T1.5 | transcript L2：yt-dlp + ffmpeg + FunASR 本地转写 | AI | T1.4 | 2.5 || ◐ |
+| T1.6 | extractor：垂类路由 + 3 份 Few-Shot 模板 + pydantic 重试 | 负责人 | T1.1 | 3 || ☑ |
+| T1.7 | 任务状态机执行器（异步、中间态自愈）+ 提取/查询 API | 后端 | T1.3–T1.6 | 2 || ☑ |
+| T1.8 | `extract_cli.py` 端到端验证脚本 + service 单测 | 后端 | T1.7 | 1 || ◐ |
 
 ### 阶段 2（第 3–5 周）— Android MVP（关键路径）
 

@@ -21,5 +21,11 @@ def test_douyin():
     assert m and m.group(0).startswith("https://v.douyin.com/")
 
 
+def test_bilibili_av_link():
+    """旧分享短链展开后是 av 号（实测 b23.tv/avxxx 场景）。"""
+    text = "https://www.bilibili.com/video/av1335454765"
+    assert extract_first_url(text) == text
+
+
 def test_no_url():
     assert extract_first_url("随便一段话没有链接") is None
