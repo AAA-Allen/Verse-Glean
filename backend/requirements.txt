@@ -1,0 +1,19 @@
+fastapi==0.115.12
+uvicorn[standard]==0.34.2
+pydantic==2.11.4
+pydantic-settings==2.9.1
+sqlalchemy==2.0.40
+alembic==1.15.2
+pymysql==1.1.1
+cryptography==44.0.2
+httpx==0.28.1
+loguru==0.7.3
+numpy==2.2.5
+yt-dlp==2025.6.9
+
+# ASR（本机无环境时可先不装，转写自动降级报错）
+# funasr==1.2.6
+# torch  # 由 funasr 拉起，约 2GB
+
+# dev
+pytest==8.3.5

@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">影海拾光</string>
+    <string name="floating_hint">先在视频 App 点「分享 → 复制链接」，再点我</string>
+    <string name="extract_pending">正在提取知识胶囊…</string>
+    <string name="extract_done">提取完成，点击查看</string>
+</resources>
