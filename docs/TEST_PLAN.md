@@ -59,7 +59,7 @@
 | TC-B01 | 提交提取 | 已鉴权 | POST /extractions 传有效 B 站口令 | code=0，返回 task_id，status=pending；DB 有任务记录 | P0 | B1/AC-01 |
 | TC-B02 | 提交提取-手动文案 | 已鉴权 | POST /extractions 传 manual_text | code=0；video.platform=manual | P0 | B5 |
 | TC-B03 | 参数互斥 | 已鉴权 | share_text 与 manual_text 同时传 | code=1001 | P0 | B1/B5 |
-| TC-B04 | 口令不可解析 | 已鉴权 | share_text="随便一段话" | task 走到 failed，stage_error 含 2001 | P0 | US-2/AC-05 |
+| TC-B04 | 口令不可解析 | 已鉴权 | share_text="随便一段话" | 同步返回 code=2001（http 422），不创建任务 | P0 | US-2/AC-05 |
 | TC-B05 | 幂等提交 | 已鉴权，已有进行中任务 | 同一 source_url 再次提交 | 返回原 task_id，不新建任务 | P0 | DB 幂等 |
 | TC-B06 | 任务进度查询 | 存在 transcribing 任务 | GET /extractions/{task_id} 轮询 | 状态按 pending→…→done 迁移可观测 | P0 | B6 |
 | TC-B07 | 任务不存在 | 已鉴权 | GET /extractions/不存在ID | code=2004，http 404 | P1 | API |

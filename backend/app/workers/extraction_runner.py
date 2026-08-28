@@ -3,6 +3,7 @@
 MVP 用 FastAPI BackgroundTasks 同进程执行；M4 引 Redis/Celery 时本文件的状态迁移逻辑可整体复用。
 """
 import asyncio
+import hashlib
 from datetime import datetime, timedelta
 
 from loguru import logger
@@ -69,6 +70,10 @@ def run_extraction(session_factory: sessionmaker, task_id: int) -> None:
             capsule.category = capsule_data.category
             capsule.model = get_settings().llm_model
             capsule.prompt_version = prompt_version
+            # 转写指纹：判断转写变化是否需要重提取（DATABASE.md §2.4）
+            capsule.source_text_digest = hashlib.sha256(
+                (video.transcript or "").encode("utf-8")
+            ).hexdigest()
             db.flush()
 
             db.query(CapsuleTag).filter(CapsuleTag.capsule_id == capsule.id).delete()

@@ -7,7 +7,7 @@ from app.core.database import get_db, SessionLocal
 from app.models import Capsule, ExtractionTask, User, Video, task_public_id
 from app.models.video import source_digest
 from app.schemas.extraction import ExtractionCreate, ManualRetry
-from app.schemas.response import ERR_NOT_FOUND, ERR_PARAM, biz_error, ok
+from app.schemas.response import ERR_NOT_FOUND, ERR_PARAM, ERR_SHARE_UNRESOLVABLE, biz_error, ok
 from app.workers.extraction_runner import run_extraction
 
 router = APIRouter(prefix="/extractions", tags=["extractions"])
@@ -86,7 +86,8 @@ def _extract_url(share_text: str) -> str:
 
     url = extract_first_url(share_text or "")
     if not url:
-        raise biz_error(ERR_PARAM, "share_text 中未找到可识别的视频链接")
+        # 口令无法解析 = 2001（API.md 错误表/TC-B04），而非参数错误
+        raise biz_error(ERR_SHARE_UNRESOLVABLE, "share_text 中未找到可识别的视频链接")
     return url
 
 

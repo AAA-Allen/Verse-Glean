@@ -17,11 +17,15 @@ import androidx.compose.ui.unit.dp
  * TODO(T2.6): Compose 列表/详情/编辑页；TODO(T2.1): 接 Retrofit 真实数据。
  */
 class MainActivity : ComponentActivity() {
+
+    // 可观察状态放 Activity 字段，onResume 重新评估（从系统设置页授权返回后自动刷新）
+    private var hasOverlay by mutableStateOf(false)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        hasOverlay = Settings.canDrawOverlays(this)
         setContent {
             MaterialTheme {
-                var hasOverlay by remember { mutableStateOf(Settings.canDrawOverlays(this)) }
                 Scaffold(
                     topBar = { TopAppBar(title = { Text("影海拾光") }) },
                 ) { padding ->
@@ -38,7 +42,6 @@ class MainActivity : ComponentActivity() {
                                         android.net.Uri.parse("package:$packageName"),
                                     )
                                 )
-                                hasOverlay = Settings.canDrawOverlays(this@MainActivity)
                             }) { Text("去授权") }
                         } else {
                             Text("胶囊列表（T2.6 实现）")
@@ -47,5 +50,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        hasOverlay = Settings.canDrawOverlays(this)
     }
 }

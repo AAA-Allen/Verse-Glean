@@ -27,18 +27,22 @@ class ShareReceiverActivity : Activity() {
 
         // TODO(T2.2): 换成 Compose 等待页（轮询 task 进度 + 结果卡片），当前骨架仅提交
         CoroutineScope(Dispatchers.IO).launch {
-            runCatching { ApiClient.service.createExtraction(ExtractionCreate(share_text = shareText)) }
-                .onSuccess { env ->
-                    if (env.code == 0) {
-                        Toast.makeText(this@ShareReceiverActivity, "已提交提取", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(this@ShareReceiverActivity, env.message, Toast.LENGTH_LONG).show()
-                    }
-                }
-                .onFailure {
+            // 网络调用留在 IO 线程；Toast/finish 必须回主线程（API 29 无 Looper 线程会崩）
+            val result = runCatching {
+                ApiClient.service.createExtraction(ExtractionCreate(share_text = shareText))
+            }
+            runOnUiThread {
+                result.onSuccess { env ->
+                    Toast.makeText(
+                        this@ShareReceiverActivity,
+                        if (env.code == 0) "已提交提取" else env.message,
+                        if (env.code == 0) Toast.LENGTH_SHORT else Toast.LENGTH_LONG,
+                    ).show()
+                }.onFailure {
                     Toast.makeText(this@ShareReceiverActivity, "网络错误：${it.message}", Toast.LENGTH_LONG).show()
                 }
-            finish()
+                finish()
+            }
         }
     }
 }

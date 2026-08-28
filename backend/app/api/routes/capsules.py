@@ -49,12 +49,17 @@ def list_capsules(
         .limit(page_size)
         .all()
     )
+    # 批量取关联视频，避免逐行 db.get 的 N+1（压测热点路径 AC-09）
+    video_ids = {c.video_id for c in rows}
+    videos: dict[int, Video] = {}
+    if video_ids:
+        videos = {v.id: v for v in db.query(Video).filter(Video.id.in_(video_ids)).all()}
     return ok(
         {
             "total": total,
             "page": page,
             "page_size": page_size,
-            "items": [_summary(db, c) for c in rows],
+            "items": [_summary(videos[c.video_id], c) for c in rows],
         }
     )
 
@@ -115,8 +120,7 @@ def delete_capsule(
     return ok({"id": capsule.id})
 
 
-def _summary(db: Session, c: Capsule) -> dict:
-    video = db.get(Video, c.video_id)
+def _summary(video: Video, c: Capsule) -> dict:
     return {
         "id": c.id,
         "theme": c.theme,
