@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Node / 前端
+node_modules/
+dist/
+.vite/
+*.local
+
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+*.apk
+*.keystore
+!debug.keystore
+
+# 环境与密钥（严禁入库）
+.env
+.env.*
+!.env.example
+*.pem
+secrets/
+
+# 数据库与临时文件
+*.db
+*.sqlite3
+*.mp4
+*.mp3
+*.m4a
+tmp/
+logs/
+
+# IDE / 系统
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
