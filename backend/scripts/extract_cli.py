@@ -6,13 +6,15 @@
 依赖：后端已启动（默认 http://127.0.0.1:8000），.env 已配置 DashScope Key。
 """
 import argparse
+import os
 import sys
 import time
 
 import httpx
 
 BASE = "http://127.0.0.1:8000/api/v1"
-TOKEN = "dev-single-user-token"  # 与 backend/.env 的 YHSG_API_TOKEN 一致
+# 与 backend/.env 的 YHSG_API_TOKEN 保持一致；可经环境变量覆盖
+TOKEN = os.environ.get("YHSG_API_TOKEN", "dev-single-user-token")
 
 
 def main() -> int:

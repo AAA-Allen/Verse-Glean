@@ -37,6 +37,9 @@ def run_extraction(session_factory: sessionmaker, task_id: int) -> None:
             _set_status(db, task, "resolving")
             if video.platform != "manual" and not video.transcript:
                 resolved = await_(_resolve(video))
+                # 平台/BV号以解析结果为准（创建时硬编码 bilibili，见 extractions.create）
+                video.platform = resolved.platform
+                video.bvid = resolved.bvid or video.bvid
                 video.title = video.title or resolved.title
                 video.cover_url = video.cover_url or resolved.cover_url
                 video.duration_sec = video.duration_sec or resolved.duration_sec
@@ -75,7 +78,7 @@ def run_extraction(session_factory: sessionmaker, task_id: int) -> None:
             _set_status(db, task, "done")
 
             # 后置：向量化 + 语义建边（失败不回滚主流程，图谱 60s 内可见即可）
-            _post_process(db, capsule)
+            _post_process(session_factory, capsule.id)
         except Exception as exc:  # noqa: BLE001 降级链要求任何单点失败收敛为 failed
             db.rollback()
             task = db.get(ExtractionTask, task_id)
@@ -103,10 +106,17 @@ def await_(coro):
     return asyncio.run(coro)
 
 
-def _post_process(db: Session, capsule: Capsule) -> None:
+def _post_process(session_factory: sessionmaker, capsule_id: int) -> None:
+    """向量化+建边：使用独立会话，与已提交的主事务隔离，失败只告警。"""
+
     async def _job() -> None:
-        if await embedder.embed_capsule(db, capsule):
-            graph.rebuild_links_for(db, capsule)
+        db: Session = session_factory()
+        try:
+            capsule = db.get(Capsule, capsule_id)
+            if capsule and await embedder.embed_capsule(db, capsule):
+                graph.rebuild_links_for(db, capsule)
+        finally:
+            db.close()
 
     try:
         asyncio.run(_job())

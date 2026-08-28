@@ -1,4 +1,9 @@
-"""LLM 胶囊提取引擎（PRD B3）：垂类路由 → Few-Shot → JSON 强约束 → pydantic 校验重试。"""
+"""LLM 胶囊提取引擎（PRD B3）：垂类路由 → Few-Shot → JSON 强约束 → pydantic 校验重试。
+
+路由策略（TECHNICAL_DESIGN §4.3）：首轮用 step 模板（内含垂类判定指令）；
+判定为 config/theory 时换对应模板重提，使 Few-Shot 与垂类匹配；
+prompt_version 记录"实际产出胶囊所用"的模板版本。
+"""
 import json
 from functools import lru_cache
 from pathlib import Path
@@ -6,9 +11,10 @@ from pathlib import Path
 from loguru import logger
 
 from app.core import llm
-from app.schemas.capsule import CATEGORIES, CapsuleSchema
+from app.schemas.capsule import CapsuleSchema
 
 PROMPT_DIR = Path(__file__).resolve().parents[2] / "prompts"
+DEFAULT_CATEGORY = "step"  # 首轮路由模板（含垂类判定指令）
 MAX_RETRIES = 2  # 校验失败重试上限（AC-03 依赖）
 
 
@@ -35,23 +41,31 @@ def _user_prompt(transcript: str, schema_error: str | None = None) -> str:
     return "\n".join(parts)
 
 
+def _parse(content: str) -> CapsuleSchema:
+    """JSON 解析 + Schema 校验；JSONDecodeError 是 ValueError 子类，统一向上抛 ValueError。"""
+    return CapsuleSchema.model_validate(json.loads(content))
+
+
 async def extract(transcript: str) -> tuple[CapsuleSchema, str]:
-    """转写文本 → (知识胶囊, prompt_version)；重试耗尽抛 ExtractionError。"""
-    last_error = None
-    for attempt in range(1 + MAX_RETRIES):
-        # 首次调用未定垂类，走 step 模板分类路由（step 模板含垂类判定指令）
-        category = CATEGORIES[0]
-        content = await llm.chat_json(_system_prompt(category), _user_prompt(transcript, last_error))
+    """转写文本 → (知识胶囊, 实际所用模板的 prompt_version)；重试耗尽抛 ExtractionError。"""
+    used = DEFAULT_CATEGORY
+    last_error: str | None = None
+    # 总调用预算：首轮 + 1 次垂类模板切换 + MAX_RETRIES 次格式修正
+    for attempt in range(1 + MAX_RETRIES + 1):
+        content = await llm.chat_json(_system_prompt(used), _user_prompt(transcript, last_error))
         try:
-            data = json.loads(content)
-            capsule = CapsuleSchema.model_validate(data)
-            # LLM 若给出与路由不同的 category，以模板二次校验（不重复调用，直接信任输出）
-            version = template_version(capsule.category)
-            logger.info("extract ok: category={} attempt={}", capsule.category, attempt)
-            return capsule, version
-        except (json.JSONDecodeError, ValueError) as exc:
+            capsule = _parse(content)
+        except ValueError as exc:
             last_error = str(exc)
             logger.warning("extract attempt {} invalid: {}", attempt, last_error)
+            continue
+        if capsule.category == used:
+            logger.info("extract ok: category={} attempt={}", used, attempt)
+            return capsule, template_version(used)
+        # 垂类判定生效 → 换对应模板重提，让 Few-Shot 示例与内容垂类匹配
+        logger.info("category rerouted {} -> {}", used, capsule.category)
+        used = capsule.category
+        last_error = None
 
     raise ExtractionError(last_error or "unknown")
 

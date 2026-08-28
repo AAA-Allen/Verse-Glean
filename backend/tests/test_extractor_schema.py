@@ -41,7 +41,9 @@ def test_empty_tags_rejected():
         )
 
 
-def test_prompt_templates_loadable():
+def test_prompt_templates_versioned():
+    """模板版本头必须为 `category-vN` 格式，否则落库的 prompt_version 无法追溯。"""
+    import re
+
     for category in ("step", "config", "theory"):
-        text = template_version(category)
-        assert text.startswith(("[", "step", "config", "theory")) or "v" in text
+        assert re.fullmatch(rf"{category}-v\d+", template_version(category)), template_version(category)

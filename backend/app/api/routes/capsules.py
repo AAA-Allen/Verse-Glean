@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.core.database import get_db
-from app.models import Capsule, CapsuleTag, User, Video
+from app.models import Capsule, CapsuleLink, CapsuleTag, Embedding, User, Video
 from app.schemas.capsule import CATEGORIES
 from app.schemas.extraction import CapsuleUpsert
 from app.schemas.response import ERR_NOT_FOUND, biz_error, ok
@@ -105,7 +105,12 @@ def delete_capsule(
     from datetime import datetime
 
     capsule = _owned_capsule(capsule_id, user, db)
-    capsule.deleted_at = datetime.now()  # 软删；links/embeddings 由 FK CASCADE 清理
+    # 软删不触发 FK CASCADE，相邻边与向量由应用层清理（DATABASE.md §4）
+    db.query(CapsuleLink).filter(
+        (CapsuleLink.source_id == capsule.id) | (CapsuleLink.target_id == capsule.id)
+    ).delete(synchronize_session=False)
+    db.query(Embedding).filter(Embedding.capsule_id == capsule.id).delete(synchronize_session=False)
+    capsule.deleted_at = datetime.now()
     db.commit()
     return ok({"id": capsule.id})
 

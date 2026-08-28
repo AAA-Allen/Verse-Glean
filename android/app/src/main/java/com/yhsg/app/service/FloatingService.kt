@@ -7,7 +7,6 @@ import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.IBinder
 import android.view.Gravity
-import android.view.MotionEvent
 import android.view.WindowManager
 import android.widget.TextView
 
@@ -54,8 +53,6 @@ class FloatingService : Service() {
             //  无口令时展示引导文案 strings/floating_hint
         }
     }
-
-    private fun onTouch(v: android.view.View, e: MotionEvent): Boolean = false
 
     override fun onDestroy() {
         ballView?.let { wm.removeView(it) }

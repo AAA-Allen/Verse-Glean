@@ -39,6 +39,9 @@ def create_extraction(
                 source_url=None,
                 source_hash=source_digest(body.manual_text),
                 title=body.title or "手动粘贴文案",
+                # 手动文案即转写结果，直接入库，runner 跳过转写步
+                transcript=body.manual_text,
+                transcript_source="manual",
             )
             db.add(video)
             db.flush()
