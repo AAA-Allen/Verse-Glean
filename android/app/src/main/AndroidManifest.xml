@@ -10,11 +10,11 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
 
-    <!-- TODO(M4 release): 明文流量仅开发期允许，上线前换 network_security_config 收紧 -->
+    <!-- 明文流量：debug 开（局域网联调）、release 关（占位由 gradle 按 buildType 注入） -->
     <application
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:usesCleartextTraffic="true"
+        android:usesCleartextTraffic="${usesCleartextTraffic}"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
 
         <!-- 主界面：胶囊列表/详情 -->

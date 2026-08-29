@@ -36,10 +36,15 @@ android {
     }
 
     buildTypes {
+        debug {
+            // 联调期连局域网明文 HTTP；release 一律关闭（第四轮审查 2.2）
+            manifestPlaceholders["usesCleartextTraffic"] = "true"
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            manifestPlaceholders["usesCleartextTraffic"] = "false"
             if (keystoreProps.isNotEmpty()) {
                 signingConfig = signingConfigs.getByName("release")
             }

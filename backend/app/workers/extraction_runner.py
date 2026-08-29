@@ -15,7 +15,6 @@ from app.models import Capsule, CapsuleTag, ExtractionTask, Video
 from app.services import embedder, extractor, graph, resolver
 from app.services.extractor import ExtractionError
 from app.services.transcript.pipeline import TranscriptUnavailable, transcribe
-
 # 中间态超时阈值：服务重启自愈（DATABASE.md §4）
 STALE_AFTER = timedelta(minutes=10)
 
@@ -83,6 +82,7 @@ def run_extraction(session_factory: sessionmaker, task_id: int) -> None:
                 db.add(CapsuleTag(capsule_id=capsule.id, tag=tag))
             task.raw_llm_output = None
             _set_status(db, task, "done")
+            graph.invalidate(task.user_id)  # 新胶囊入图谱缓存失效（T4.4）
 
             # 后置：向量化 + 语义建边（失败不回滚主流程，图谱 60s 内可见即可）
             _post_process(session_factory, capsule.id)

@@ -8,6 +8,7 @@ from app.models import Capsule, CapsuleLink, CapsuleTag, Embedding, User, Video
 from app.schemas.capsule import CATEGORIES
 from app.schemas.extraction import CapsuleUpsert
 from app.schemas.response import ERR_NOT_FOUND, biz_error, ok
+from app.services.graph import invalidate as invalidate_graph
 
 router = APIRouter(prefix="/capsules", tags=["capsules"])
 
@@ -100,6 +101,7 @@ def update_capsule(
             db.add(CapsuleTag(capsule_id=capsule.id, tag=tag[:64]))
     db.commit()
     db.refresh(capsule)
+    invalidate_graph(user.id)  # 图谱写穿失效（T4.4 缓存）
     return ok(_detail(db, capsule))
 
 
@@ -117,6 +119,7 @@ def delete_capsule(
     db.query(Embedding).filter(Embedding.capsule_id == capsule.id).delete(synchronize_session=False)
     capsule.deleted_at = datetime.now()
     db.commit()
+    invalidate_graph(user.id)
     return ok({"id": capsule.id})
 
 

@@ -36,7 +36,6 @@ def synth_vector(category: str) -> list[float]:
 def main(cleanup: bool) -> None:
     db = SessionLocal()
     try:
-        dev = db.query(Video.__table__.c.user_id).limit(1)
         from app.models import User
 
         dev_user = db.query(User).first()
@@ -45,21 +44,30 @@ def main(cleanup: bool) -> None:
             return
 
         if cleanup:
+            from datetime import datetime
+
             caps = (
                 db.query(Capsule)
                 .filter(Capsule.theme.like(f"{PREFIX}·%"))
                 .all()
             )
+            video_ids = [c.video_id for c in caps]
             for c in caps:
                 db.query(CapsuleLink).filter(
                     (CapsuleLink.source_id == c.id) | (CapsuleLink.target_id == c.id)
                 ).delete(synchronize_session=False)
                 db.query(Embedding).filter(Embedding.capsule_id == c.id).delete(synchronize_session=False)
-                from datetime import datetime
-
                 c.deleted_at = datetime.now()
+            # 关联的样例视频一并软删，不留孤儿记录
+            cleaned_videos = (
+                db.query(Video)
+                .filter(Video.id.in_(video_ids))
+                .update({Video.deleted_at: datetime.now()}, synchronize_session=False)
+                if video_ids
+                else 0
+            )
             db.commit()
-            print(f"已清理 {len(caps)} 个样例胶囊")
+            print(f"已清理 {len(caps)} 个样例胶囊（含 {cleaned_videos} 条样例视频）")
             return
 
         existing = db.query(Capsule).filter(Capsule.theme.like(f"{PREFIX}·%")).count()

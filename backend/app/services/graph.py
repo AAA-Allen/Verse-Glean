@@ -1,4 +1,6 @@
 """语义关联与图谱数据（PRD B7/B8）：余弦建边 + 节点/边输出。"""
+import time
+
 import numpy as np
 from loguru import logger
 from sqlalchemy.orm import Session
@@ -9,6 +11,16 @@ from app.services.embedder import load_vectors
 
 # 超过该数量只与最近 N 条建边（TECHNICAL_DESIGN §4.4）
 LINK_WINDOW = 500
+
+# 图谱读缓存（T4.4）：graph 端点并发下 GIL 争用雪崩（实测 20ms→3000ms），
+# 全量图谱按用户缓存 TTL 60s；写路径（编辑/删除/新胶囊）调 invalidate()。
+# 上云部署时把本缓存换成 Redis（DEVELOPMENT_PLAN 遗留项）。
+GRAPH_TTL = 60.0
+_graph_cache: dict[int, tuple[float, dict]] = {}
+
+
+def invalidate(user_id: int) -> None:
+    _graph_cache.pop(user_id, None)
 
 
 def rebuild_links_for(db: Session, capsule: Capsule) -> int:
@@ -47,6 +59,24 @@ def rebuild_links_for(db: Session, capsule: Capsule) -> int:
     if added:
         db.commit()
     return added
+
+
+def get_graph_view(db: Session, user_id: int, category: str | None = None, tag: str | None = None) -> dict:
+    """带缓存的图谱读取：全量图谱按用户缓存，垂类/标签过滤在副本上做。"""
+    now = time.time()
+    hit = _graph_cache.get(user_id)
+    if hit and now - hit[0] < GRAPH_TTL:
+        full = hit[1]
+    else:
+        full = graph_data(db, user_id)
+        _graph_cache[user_id] = (now, full)
+
+    if not category and not tag:
+        return full
+    nodes = [n for n in full["nodes"] if (not category or n["category"] == category) and (not tag or tag in (n["tags"] or []))]
+    keep = {n["id"] for n in nodes}
+    edges = [e for e in full["edges"] if e["source"] in keep and e["target"] in keep]
+    return {"nodes": nodes, "edges": edges}
 
 
 def graph_data(db: Session, user_id: int) -> dict:
