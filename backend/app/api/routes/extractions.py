@@ -1,5 +1,9 @@
-"""提取任务接口：提交 / 查询进度 / 手动文案重试。对齐 docs/API.md §3.1。"""
-from fastapi import APIRouter, BackgroundTasks, Depends
+"""提取任务接口：提交 / 查询进度 / 手动文案重试 / 音频上传。对齐 docs/API.md §3.1。"""
+import tempfile
+import uuid
+from pathlib import Path
+
+from fastapi import APIRouter, BackgroundTasks, Depends, File, UploadFile
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
@@ -11,6 +15,8 @@ from app.schemas.response import ERR_NOT_FOUND, ERR_PARAM, ERR_SHARE_UNRESOLVABL
 from app.workers.extraction_runner import run_extraction
 
 router = APIRouter(prefix="/extractions", tags=["extractions"])
+
+MAX_AUDIO_BYTES = 20 * 1024 * 1024  # 16k 单声道 wav 约 32KB/s，20MB ≈ 10 分钟
 
 
 @router.post("")
@@ -72,6 +78,71 @@ def create_extraction(
     db.refresh(task)
 
     background.add_task(run_extraction, SessionLocal, task.id)
+    return ok(
+        {
+            "task_id": task_public_id(task.id, task.created_at),
+            "status": task.status,
+            "video_id": video.id,
+        }
+    )
+
+
+@router.post("/audio")
+def create_audio_extraction(
+    background: BackgroundTasks,
+    file: UploadFile = File(...),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """T3.7 音频捕获通道：App 采集的正在播放音频（wav）上传 → ASR 转写 → 胶囊。"""
+    import threading
+
+    data = file.file.read()
+    if len(data) < 1024:
+        raise biz_error(ERR_PARAM, "音频内容过短")
+    if len(data) > MAX_AUDIO_BYTES:
+        raise biz_error(ERR_PARAM, "音频超过 10 分钟上限")
+
+    wav_path = Path(tempfile.gettempdir()) / f"yhsg_cap_{uuid.uuid4().hex}.wav"
+    wav_path.write_bytes(data)
+
+    video = Video(
+        user_id=user.id,
+        platform="capture",
+        source_url=None,
+        source_hash=source_digest(f"capture:{wav_path.name}"),
+        title="音频捕获片段",
+    )
+    db.add(video)
+    db.flush()
+    task = ExtractionTask(video_id=video.id, user_id=user.id, status="transcribing")
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+
+    def _asr_then_extract() -> None:
+        """先转写（模型推理，CPU 数秒到数十秒），转写文本落库后复用提取状态机。"""
+        from app.services.transcript.asr_funasr import transcribe_file
+
+        s: Session = SessionLocal()
+        try:
+            v = s.get(Video, video.id)
+            try:
+                v.transcript = transcribe_file(wav_path)
+                v.transcript_source = "asr"
+                s.commit()
+            except Exception as exc:  # noqa: BLE001
+                from app.workers.extraction_runner import _set_status
+
+                t = s.get(ExtractionTask, task.id)
+                _set_status(s, t, "failed", f"ASR: {exc}"[:512])
+                return
+            run_extraction(SessionLocal, task.id)
+        finally:
+            s.close()
+            wav_path.unlink(missing_ok=True)
+
+    threading.Thread(target=_asr_then_extract, daemon=True).start()
     return ok(
         {
             "task_id": task_public_id(task.id, task.created_at),

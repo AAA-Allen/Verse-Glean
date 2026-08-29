@@ -58,6 +58,12 @@ def _transcribe_sync(url: str, out_wav: Path) -> str:
     return "".join(res["text"] for res in result)
 
 
+def transcribe_file(wav_path: str | Path) -> str:
+    """直接转写本地音频文件（音频捕获通道上传的 wav），不再走下载。"""
+    result = _get_model().generate(input=str(wav_path))
+    return "".join(res["text"] for res in result)
+
+
 async def transcribe(url: str) -> str:
     """在线程池执行（下载 + 推理均为阻塞/CPU 型），异常向上抛由 pipeline 降级。"""
     out_wav = Path(tempfile.gettempdir()) / f"yhsg_{abs(hash(url)) % 10**10}.wav"

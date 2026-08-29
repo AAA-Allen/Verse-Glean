@@ -122,7 +122,17 @@
 
 轮询建议：App/H5 每 2s 一次，`done`/`failed` 终止；`failed` 时按 `stage_error` 展示原因（US-2/US-3）。
 
-#### 3.1.3 失败任务手动文案重试
+#### 3.1.3 音频上传提取（T3.7 音频捕获通道）
+
+`POST /api/v1/extractions/audio`（multipart/form-data）
+
+| 参数 | 位置 | 类型 | 必填 | 说明 |
+| --- | --- | --- | --- | --- |
+| file | form-data | file | 是 | 16k 单声道 WAV，≤20MB（约 10 分钟音频） |
+
+响应同 3.1.1（task 初始状态 `transcribing`）。服务端执行：FunASR 转写 → LLM 胶囊 → 入库，`video.platform='capture'`、`transcript_source='asr'`。错误：`1001`（过短/超限）。
+
+#### 3.1.4 失败任务手动文案重试
 
 `POST /api/v1/extractions/{task_id}/manual-text` — 对应状态机 `failed → transcribing`、PRD B5
 

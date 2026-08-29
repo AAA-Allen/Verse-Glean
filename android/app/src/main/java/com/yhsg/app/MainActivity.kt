@@ -32,6 +32,19 @@ class MainActivity : ComponentActivity() {
     private val notifPermission =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
+    // T3.7：MediaProjection 授权弹窗必须由 Activity 发起；授权结果转交前台服务采集
+    private val projectionLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK && result.data != null) {
+                startForegroundService(
+                    Intent(this, com.yhsg.app.service.CaptureService::class.java).apply {
+                        putExtra(com.yhsg.app.service.CaptureService.EXTRA_RESULT_CODE, result.resultCode)
+                        putExtra(com.yhsg.app.service.CaptureService.EXTRA_RESULT_DATA, result.data)
+                    }
+                )
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (Build.VERSION.SDK_INT >= 33) {
@@ -98,10 +111,17 @@ class MainActivity : ComponentActivity() {
                         },
                     )
                 } ?: Column(Modifier.padding(padding).padding(16.dp)) {
-                    Button(onClick = {
-                        startForegroundService(Intent(this@MainActivity, FloatingService::class.java))
-                        scope.launch { snackbar.showSnackbar("悬浮球已启动，去视频 App 试试") }
-                    }) { Text("启动悬浮球") }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(onClick = {
+                            startForegroundService(Intent(this@MainActivity, FloatingService::class.java))
+                            scope.launch { snackbar.showSnackbar("悬浮球已启动，去视频 App 试试") }
+                        }) { Text("启动悬浮球") }
+                        OutlinedButton(onClick = {
+                            val mpm = getSystemService(MEDIA_PROJECTION_SERVICE)
+                                as android.media.projection.MediaProjectionManager
+                            projectionLauncher.launch(mpm.createScreenCaptureIntent())
+                        }) { Text("捕获当前声音") }
+                    }
                     Spacer(Modifier.height(12.dp))
                     if (capsuleList.isEmpty()) {
                         Text("还没有胶囊：去抖音/B站点「分享 → 影海拾光」")

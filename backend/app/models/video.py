@@ -6,7 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, IdMixin, SoftDeleteMixin, TimestampMixin
 
-PLATFORMS = ("bilibili", "douyin", "manual")
+PLATFORMS = ("bilibili", "douyin", "manual", "capture")
 TRANSCRIPT_SOURCES = ("subtitle_api", "asr", "manual")
 
 # 转写文本 MySQL 用 MEDIUMTEXT，SQLite 开发库退化为 Text

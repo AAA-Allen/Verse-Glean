@@ -34,9 +34,9 @@ def run_extraction(session_factory: sessionmaker, task_id: int) -> None:
         task = db.get(ExtractionTask, task_id)
         video = db.get(Video, task.video_id)
         try:
-            # resolving：manual 模式无链接可解析，直接过
+            # resolving：manual/capture 模式无链接可解析，直接过
             _set_status(db, task, "resolving")
-            if video.platform != "manual" and not video.transcript:
+            if video.platform not in ("manual", "capture") and not video.transcript:
                 resolved = await_(_resolve(video))
                 # 平台/BV号/展开后的真实地址以解析结果为准（创建时只有短链，
                 # 短链域 b23.tv 会被风控/via 代理拦截，转写必须用展开地址）

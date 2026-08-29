@@ -1,9 +1,12 @@
 package com.yhsg.app.network
 
+import okhttp3.MultipartBody
 import retrofit2.http.Body
 import retrofit2.http.GET
-import retrofit2.http.PATCH
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.PATCH
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -14,6 +17,11 @@ interface YingHaiApi {
 
     @POST("api/v1/extractions")
     suspend fun createExtraction(@Body body: ExtractionCreate): ApiEnvelope<TaskData>
+
+    /** T3.7 音频捕获：wav 上传（后端 ASR → 胶囊）。 */
+    @Multipart
+    @POST("api/v1/extractions/audio")
+    suspend fun uploadAudio(@Part file: MultipartBody.Part): ApiEnvelope<TaskData>
 
     @POST("api/v1/extractions/{taskId}/manual-text")
     suspend fun retryWithManualText(

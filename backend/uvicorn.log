@@ -1,20 +1,147 @@
-INFO:     Started server process [44884]
+INFO:     Started server process [31792]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     127.0.0.1:51779 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:59258 - "POST /api/v1/auth/login HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:55829 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:63799 - "GET /api/v1/capsules?page=1 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:61174 - "GET /api/v1/graph HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56531 - "GET /api/v1/graph HTTP/1.1" 200 OK
-INFO:     127.0.0.1:55177 - "GET /api/v1/graph HTTP/1.1" 200 OK
-INFO:     127.0.0.1:56941 - "GET /api/v1/graph HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62282 - "GET /api/v1/capsules?page=1 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54532 - "GET /api/v1/capsules?page=1 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:63785 - "GET /api/v1/graph HTTP/1.1" 200 OK
-INFO:     127.0.0.1:62745 - "GET /api/v1/graph HTTP/1.1" 200 OK
-INFO:     127.0.0.1:52947 - "GET /api/v1/graph HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49978 - "GET /api/v1/graph HTTP/1.1" 200 OK
-INFO:     127.0.0.1:63662 - "GET /api/v1/capsules?page=1 HTTP/1.1" 200 OK
-INFO:     127.0.0.1:49644 - "GET /api/v1/capsules?page=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49971 - "POST /api/v1/extractions/audio HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49971 - "GET /api/v1/extractions/20260829084315_000018 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49971 - "GET /api/v1/extractions/20260829084315_000018 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49971 - "GET /api/v1/extractions/20260829084315_000018 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49971 - "GET /api/v1/extractions/20260829084315_000018 HTTP/1.1" 200 OK
+[32m2026-08-29 16:43:29.620[0m | [1mINFO    [0m | [36mapp.services.transcript.asr_funasr[0m:[36m_get_model[0m:[36m22[0m - [1mloading FunASR paraformer-zh ...[0m
+2026-08-29 16:43:29,621 [INFO] download models from model hub: ms
+funasr version: 1.4.6.
+INFO:     127.0.0.1:49971 - "GET /api/v1/extractions/20260829084315_000018 HTTP/1.1" 200 OK
+2026-08-29 16:43:30,944 | INFO    | modelscope_hub.download | Downloading 13 files from iic/speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch@master
+Downloading:   0%|          | 0/13 [00:00<?, ?file/s]Downloading: 100%|██████████| 13/13 [00:00<00:00, 23.28file/s]Downloading: 100%|██████████| 13/13 [00:00<00:00, 23.27file/s]
+2026-08-29 16:43:31,523 [WARNING] trust_remote_code: False
+2026-08-29 16:43:32,366 [INFO] Loading pretrained params from C:\Users\liyup\.cache\modelscope\models\iic--speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch\snapshots\master\model.pt
+2026-08-29 16:43:32,370 [INFO] ckpt: C:\Users\liyup\.cache\modelscope\models\iic--speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch\snapshots\master\model.pt
+2026-08-29 16:43:32,945 [INFO] scope_map: ['module.', 'None']
+2026-08-29 16:43:32,945 [INFO] excludes: None
+2026-08-29 16:43:33,012 [INFO] Loading ckpt: C:\Users\liyup\.cache\modelscope\models\iic--speech_seaco_paraformer_large_asr_nat-zh-cn-16k-common-vocab8404-pytorch\snapshots\master\model.pt, status: <All keys matched successfully>
+2026-08-29 16:43:33,073 [INFO] Building VAD model.
+2026-08-29 16:43:33,073 [INFO] download models from model hub: ms
+INFO:     127.0.0.1:49971 - "GET /api/v1/extractions/20260829084315_000018 HTTP/1.1" 200 OK
+2026-08-29 16:43:34,273 | INFO    | modelscope_hub.download | Downloading 8 files from iic/speech_fsmn_vad_zh-cn-16k-common-pytorch@master
+Downloading:   0%|          | 0/8 [00:00<?, ?file/s]Downloading: 100%|██████████| 8/8 [00:00<00:00, 1587.85file/s]
+2026-08-29 16:43:34,288 [WARNING] trust_remote_code: False
+2026-08-29 16:43:34,294 [INFO] Loading pretrained params from C:\Users\liyup\.cache\modelscope\models\iic--speech_fsmn_vad_zh-cn-16k-common-pytorch\snapshots\master\model.pt
+2026-08-29 16:43:34,294 [INFO] ckpt: C:\Users\liyup\.cache\modelscope\models\iic--speech_fsmn_vad_zh-cn-16k-common-pytorch\snapshots\master\model.pt
+2026-08-29 16:43:34,297 [INFO] scope_map: ['module.', 'None']
+2026-08-29 16:43:34,298 [INFO] excludes: None
+2026-08-29 16:43:34,298 [INFO] Loading ckpt: C:\Users\liyup\.cache\modelscope\models\iic--speech_fsmn_vad_zh-cn-16k-common-pytorch\snapshots\master\model.pt, status: <All keys matched successfully>
+2026-08-29 16:43:34,298 [INFO] Building punc model.
+2026-08-29 16:43:34,298 [INFO] download models from model hub: ms
+2026-08-29 16:43:35,517 | INFO    | modelscope_hub.download | Downloading 10 files from iic/punc_ct-transformer_cn-en-common-vocab471067-large@master
+Downloading:   0%|          | 0/10 [00:00<?, ?file/s]Downloading: 100%|██████████| 10/10 [00:00<00:00, 15.58file/s]Downloading: 100%|██████████| 10/10 [00:00<00:00, 15.57file/s]
+2026-08-29 16:43:36,168 [WARNING] trust_remote_code: False
+INFO:     127.0.0.1:49971 - "GET /api/v1/extractions/20260829084315_000018 HTTP/1.1" 200 OK
+Building prefix dict from the default dictionary ...
+2026-08-29 16:43:37,139 [DEBUG] Building prefix dict from the default dictionary ...
+Loading model from cache C:\Users\liyup\AppData\Local\Temp\jieba.cache
+2026-08-29 16:43:37,140 [DEBUG] Loading model from cache C:\Users\liyup\AppData\Local\Temp\jieba.cache
+Loading model cost 0.330 seconds.
+2026-08-29 16:43:37,470 [DEBUG] Loading model cost 0.330 seconds.
+Prefix dict has been built successfully.
+2026-08-29 16:43:37,470 [DEBUG] Prefix dict has been built successfully.
+INFO:     127.0.0.1:49971 - "GET /api/v1/extractions/20260829084315_000018 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49971 - "GET /api/v1/extractions/20260829084315_000018 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49971 - "GET /api/v1/extractions/20260829084315_000018 HTTP/1.1" 200 OK
+2026-08-29 16:43:48,435 [INFO] Loading pretrained params from C:\Users\liyup\.cache\modelscope\models\iic--punc_ct-transformer_cn-en-common-vocab471067-large\snapshots\master\model.pt
+2026-08-29 16:43:48,436 [INFO] ckpt: C:\Users\liyup\.cache\modelscope\models\iic--punc_ct-transformer_cn-en-common-vocab471067-large\snapshots\master\model.pt
+2026-08-29 16:43:49,038 [INFO] scope_map: ['module.', 'None']
+2026-08-29 16:43:49,038 [INFO] excludes: None
+2026-08-29 16:43:49,091 [INFO] Loading ckpt: C:\Users\liyup\.cache\modelscope\models\iic--punc_ct-transformer_cn-en-common-vocab471067-large\snapshots\master\model.pt, status: <All keys matched successfully>
+INFO:     127.0.0.1:49971 - "GET /api/v1/extractions/20260829084315_000018 HTTP/1.1" 200 OK
+  0%|[34m          [0m| 0/1 [00:00<?, ?it/s]100%|[34m██████████[0m| 1/1 [00:00<00:00,  3.99it/s]{'load_data': '0.017', 'extract_feat': '0.214', 'forward': '0.251', 'batch_size': '1', 'rtf': '0.022'}, : 100%|[34m██████████[0m| 1/1 [00:00<00:00,  3.99it/s]rtf_avg: 0.022: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  3.99it/s]                                                                                          rtf_avg: 0.022: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  3.98it/s]
+  0%|[31m          [0m| 0/1 [00:00<?, ?it/s]
+  0%|[34m          [0m| 0/1 [00:00<?, ?it/s][A
+100%|[34m██████████[0m| 1/1 [00:00<00:00,  3.78it/s][A
+{'load_data': '0.000', 'extract_feat': '0.001', 'forward': '0.265', 'batch_size': '1', 'rtf': '0.441'}, : 100%|[34m██████████[0m| 1/1 [00:00<00:00,  3.78it/s][A
+rtf_avg: 0.441: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  3.78it/s]                                                                                          [Artf_avg: 0.441: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  3.77it/s]
+
+  0%|[34m          [0m| 0/1 [00:00<?, ?it/s][A
+{'load_data': '0.000', 'extract_feat': '0.001', 'forward': '0.079', 'batch_size': '1', 'rtf': '0.120'}, : 100%|[34m██████████[0m| 1/1 [00:00<00:00, 12.58it/s][A
+rtf_avg: 0.120: 100%|[34m██████████[0m| 1/1 [00:00<00:00, 12.56it/s]                                                                                          [Artf_avg: 0.120: 100%|[34m██████████[0m| 1/1 [00:00<00:00, 12.54it/s]
+
+  0%|[34m          [0m| 0/1 [00:00<?, ?it/s][A
+{'load_data': '0.000', 'extract_feat': '0.001', 'forward': '0.073', 'batch_size': '1', 'rtf': '0.094'}, : 100%|[34m██████████[0m| 1/1 [00:00<00:00, 13.60it/s][A
+rtf_avg: 0.094: 100%|[34m██████████[0m| 1/1 [00:00<00:00, 13.57it/s]                                                                                          [Artf_avg: 0.094: 100%|[34m██████████[0m| 1/1 [00:00<00:00, 13.55it/s]
+
+  0%|[34m          [0m| 0/1 [00:00<?, ?it/s][A
+{'load_data': '0.000', 'extract_feat': '0.001', 'forward': '0.073', 'batch_size': '1', 'rtf': '0.093'}, : 100%|[34m██████████[0m| 1/1 [00:00<00:00, 13.71it/s][A
+rtf_avg: 0.093: 100%|[34m██████████[0m| 1/1 [00:00<00:00, 13.69it/s]                                                                                          [Artf_avg: 0.093: 100%|[34m██████████[0m| 1/1 [00:00<00:00, 13.65it/s]
+
+  0%|[34m          [0m| 0/1 [00:00<?, ?it/s][A
+{'load_data': '0.000', 'extract_feat': '0.001', 'forward': '0.079', 'batch_size': '1', 'rtf': '0.094'}, : 100%|[34m██████████[0m| 1/1 [00:00<00:00, 12.62it/s][A
+rtf_avg: 0.094: 100%|[34m██████████[0m| 1/1 [00:00<00:00, 12.60it/s]                                                                                          [Artf_avg: 0.094: 100%|[34m██████████[0m| 1/1 [00:00<00:00, 12.58it/s]
+
+  0%|[34m          [0m| 0/1 [00:00<?, ?it/s][A
+100%|[34m██████████[0m| 1/1 [00:00<00:00,  9.67it/s][A
+{'load_data': '0.000', 'extract_feat': '0.001', 'forward': '0.103', 'batch_size': '1', 'rtf': '0.049'}, : 100%|[34m██████████[0m| 1/1 [00:00<00:00,  9.67it/s][A
+rtf_avg: 0.049: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  9.67it/s]                                                                                          [Artf_avg: 0.049: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  9.64it/s]
+
+  0%|[34m          [0m| 0/1 [00:00<?, ?it/s][A
+100%|[34m██████████[0m| 1/1 [00:00<00:00,  7.49it/s][A
+{'load_data': '0.000', 'extract_feat': '0.001', 'forward': '0.133', 'batch_size': '1', 'rtf': '0.045'}, : 100%|[34m██████████[0m| 1/1 [00:00<00:00,  7.49it/s][A
+rtf_avg: 0.045: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  7.49it/s]                                                                                          [Artf_avg: 0.045: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  7.46it/s]
+
+  0%|[34m          [0m| 0/1 [00:00<?, ?it/s][A
+100%|[34m██████████[0m| 1/1 [00:00<00:00,  6.08it/s][A
+{'load_data': '0.000', 'extract_feat': '0.001', 'forward': '0.165', 'batch_size': '1', 'rtf': '0.047'}, : 100%|[34m██████████[0m| 1/1 [00:00<00:00,  6.08it/s][A
+rtf_avg: 0.047: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  6.08it/s]                                                                                          [Artf_avg: 0.047: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  6.06it/s]
+
+  0%|[34m          [0m| 0/1 [00:00<?, ?it/s][A
+100%|[34m██████████[0m| 1/1 [00:00<00:00,  5.24it/s][A
+{'load_data': '0.000', 'extract_feat': '0.001', 'forward': '0.191', 'batch_size': '1', 'rtf': '0.037'}, : 100%|[34m██████████[0m| 1/1 [00:00<00:00,  5.24it/s][A
+rtf_avg: 0.037: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  5.24it/s]                                                                                          [Artf_avg: 0.037: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  5.22it/s]
+
+  0%|[34m          [0m| 0/1 [00:00<?, ?it/s][A
+100%|[34m██████████[0m| 1/1 [00:00<00:00,  5.25it/s][A
+{'load_data': '0.000', 'extract_feat': '0.002', 'forward': '0.190', 'batch_size': '1', 'rtf': '0.033'}, : 100%|[34m██████████[0m| 1/1 [00:00<00:00,  5.25it/s][A
+rtf_avg: 0.033: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  5.25it/s]                                                                                          [Artf_avg: 0.033: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  5.24it/s]
+
+  0%|[34m          [0m| 0/1 [00:00<?, ?it/s][A
+100%|[34m██████████[0m| 1/1 [00:00<00:00,  5.05it/s][A
+{'load_data': '0.000', 'extract_feat': '0.002', 'forward': '0.198', 'batch_size': '1', 'rtf': '0.034'}, : 100%|[34m██████████[0m| 1/1 [00:00<00:00,  5.05it/s][A
+rtf_avg: 0.034: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  5.05it/s]                                                                                          [Artf_avg: 0.034: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  5.04it/s]
+
+  0%|[34m          [0m| 0/1 [00:00<?, ?it/s][A
+100%|[34m██████████[0m| 1/1 [00:00<00:00,  3.58it/s][A
+{'load_data': '0.000', 'extract_feat': '0.002', 'forward': '0.279', 'batch_size': '1', 'rtf': '0.030'}, : 100%|[34m██████████[0m| 1/1 [00:00<00:00,  3.58it/s][A
+rtf_avg: 0.030: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  3.58it/s]                                                                                          [Artf_avg: 0.030: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  3.57it/s]
+
+  0%|[34m          [0m| 0/1 [00:00<?, ?it/s][AINFO:     127.0.0.1:49971 - "GET /api/v1/extractions/20260829084315_000018 HTTP/1.1" 200 OK
+
+100%|[34m██████████[0m| 1/1 [00:00<00:00,  2.61it/s][A
+{'load_data': '0.000', 'extract_feat': '0.004', 'forward': '0.383', 'batch_size': '1', 'rtf': '0.029'}, : 100%|[34m██████████[0m| 1/1 [00:00<00:00,  2.61it/s][A
+rtf_avg: 0.029: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  2.61it/s]                                                                                          [Artf_avg: 0.029: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  2.61it/s]
+
+  0%|[34m          [0m| 0/1 [00:00<?, ?it/s][A
+100%|[34m██████████[0m| 1/1 [00:00<00:00,  1.95it/s][A
+{'load_data': '0.000', 'extract_feat': '0.003', 'forward': '0.512', 'batch_size': '1', 'rtf': '0.027'}, : 100%|[34m██████████[0m| 1/1 [00:00<00:00,  1.95it/s][A
+rtf_avg: 0.027: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  1.95it/s]                                                                                          [Artf_avg: 0.027: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  1.95it/s]
+
+  0%|[34m          [0m| 0/1 [00:00<?, ?it/s][A
+100%|[34m██████████[0m| 1/1 [00:00<00:00,  1.75it/s][A
+{'load_data': '0.000', 'extract_feat': '0.004', 'forward': '0.571', 'batch_size': '1', 'rtf': '0.026'}, : 100%|[34m██████████[0m| 1/1 [00:00<00:00,  1.75it/s][A
+rtf_avg: 0.026: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  1.75it/s]                                                                                          [Artf_avg: 0.026: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  1.75it/s]
+
+  0%|[34m          [0m| 0/1 [00:00<?, ?it/s][A
+100%|[34m██████████[0m| 1/1 [00:00<00:00,  8.80it/s][A
+{'load_data': 0.0, 'extract_feat': 0.0, 'forward': '0.114', 'batch_size': '1', 'rtf': '-0.114'}, : 100%|[34m██████████[0m| 1/1 [00:00<00:00,  8.80it/s][A
+rtf_avg: -0.114: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  8.80it/s]                                                                                  [Artf_avg: -0.114: 100%|[34m██████████[0m| 1/1 [00:00<00:00,  8.77it/s]
+100%|[31m██████████[0m| 1/1 [00:03<00:00,  3.43s/it]rtf_avg: 0.026, time_speech:  131.435, time_escape: 3.420: 100%|[31m██████████[0m| 1/1 [00:03<00:00,  3.43s/it]rtf_avg: 0.026, time_speech:  131.435, time_escape: 3.420: 100%|[31m██████████[0m| 1/1 [00:03<00:00,  3.43s/it]
+[32m2026-08-29 16:43:53.517[0m | [1mINFO    [0m | [36mapp.workers.extraction_runner[0m:[36m_set_status[0m:[36m27[0m - [1mtask 18 -> resolving [0m
+[32m2026-08-29 16:43:53.524[0m | [1mINFO    [0m | [36mapp.workers.extraction_runner[0m:[36m_set_status[0m:[36m27[0m - [1mtask 18 -> transcribing [0m
+[32m2026-08-29 16:43:53.529[0m | [1mINFO    [0m | [36mapp.workers.extraction_runner[0m:[36m_set_status[0m:[36m27[0m - [1mtask 18 -> extracting [0m
+INFO:     127.0.0.1:49971 - "GET /api/v1/extractions/20260829084315_000018 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49971 - "GET /api/v1/extractions/20260829084315_000018 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49971 - "GET /api/v1/extractions/20260829084315_000018 HTTP/1.1" 200 OK
+2026-08-29 16:44:01,660 [INFO] HTTP Request: POST http://127.0.0.1:11434/v1/chat/completions "HTTP/1.1 200 OK"
+[32m2026-08-29 16:44:01.661[0m | [34m[1mDEBUG   [0m | [36mapp.core.llm[0m:[36mchat_json[0m:[36m37[0m - [34m[1mllm content len=331[0m
+[32m2026-08-29 16:44:01.661[0m | [1mINFO    [0m | [36mapp.services.extractor[0m:[36mextract[0m:[36m63[0m - [1mextract ok: category=step attempt=0[0m
+[32m2026-08-29 16:44:01.681[0m | [1mINFO    [0m | [36mapp.workers.extraction_runner[0m:[36m_set_status[0m:[36m27[0m - [1mtask 18 -> done [0m
+2026-08-29 16:44:03,219 [INFO] HTTP Request: POST http://127.0.0.1:11434/v1/embeddings "HTTP/1.1 200 OK"
+INFO:     127.0.0.1:49971 - "GET /api/v1/extractions/20260829084315_000018 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49971 - "GET /api/v1/capsules/9 HTTP/1.1" 200 OK
