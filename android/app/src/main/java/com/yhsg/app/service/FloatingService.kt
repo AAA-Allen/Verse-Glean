@@ -115,8 +115,21 @@ class FloatingService : Service() {
         cardText = TextView(this).apply {
             textSize = 14f
             setTextColor(Color.WHITE)
-            setPadding(dp(16), dp(12), dp(16), dp(12))
+            setPadding(dp(16), dp(4), dp(16), dp(12))
             text = hint
+        }
+        val close = TextView(this).apply {
+            text = "✕"
+            textSize = 14f
+            setTextColor(Color.parseColor("#88FFFFFF"))
+            setPadding(dp(12), dp(10), dp(12), dp(10))
+            // 用户可随时收起卡片（任务继续后台跑，结果走通知），长任务不再被卡片绑架
+            setOnClickListener { if (expanded) toggleExpand() }
+        }
+        val header = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.END
+            addView(close)
         }
         return LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -124,6 +137,7 @@ class FloatingService : Service() {
                 cornerRadius = dp(14).toFloat()
                 setColor(Color.parseColor("#E6202030"))
             }
+            addView(header)
             addView(cardText)
         }
     }
@@ -144,7 +158,7 @@ class FloatingService : Service() {
                 0,
                 PixelFormat.TRANSLUCENT,
             ).apply { gravity = Gravity.CENTER })
-            wm.removeView(ball)
+            runCatching { wm.removeView(ball) }
 
             val clip = getSystemService(ClipboardManager::class.java)
                 ?.primaryClip?.getItemAt(0)?.text?.toString().orEmpty()
@@ -158,8 +172,9 @@ class FloatingService : Service() {
                 hint
             }
         } else {
-            wm.removeView(card)
-            wm.addView(ball, ballParams)
+            // 手动关闭后任务完成回调可能再次触发收回，防重复拆除崩溃
+            runCatching { wm.removeView(card) }
+            runCatching { if (ball.parent == null) wm.addView(ball, ballParams) }
         }
     }
 
@@ -182,6 +197,11 @@ class FloatingService : Service() {
                     is ExtractRepository.Outcome.Failed -> {
                         cardText.text = "提取失败：${outcome.reason.take(80)}"
                         Notify.result(this@FloatingService, "提取失败", outcome.reason, ok = false)
+                        cardText.postDelayed(Runnable { if (expanded) toggleExpand() }, 3000)
+                    }
+                    is ExtractRepository.Outcome.StillProcessing -> {
+                        // 长视频超出等待窗口：服务端仍在跑，结果走通知
+                        cardText.text = "视频较长，仍在处理中\n完成后会通知你"
                         cardText.postDelayed(Runnable { if (expanded) toggleExpand() }, 3000)
                     }
                 }

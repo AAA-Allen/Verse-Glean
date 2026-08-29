@@ -9,10 +9,11 @@ cryptography==44.0.2
 httpx==0.28.1
 loguru==0.7.3
 numpy==2.2.5
-# ASR 主通道（本地转写，torch 建议 CPU 版：--index-url https://download.pytorch.org/whl/cpu）
+# ASR 主通道依赖：funasr 会自动拉起 torch，但 PyPI 默认源在部分平台装的是 GPU 版。
+# 推荐两步安装（CPU 版，体积小）：
+#   1) pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+#   2) pip install -r requirements.txt
 funasr==1.4.6
-torch==2.12.0+cpu
-torchaudio==2.12.0+cpu
 yt-dlp==2025.6.9
 
 # dev

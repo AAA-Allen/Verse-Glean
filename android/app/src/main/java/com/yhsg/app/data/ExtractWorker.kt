@@ -32,6 +32,16 @@ class ExtractWorker(context: Context, params: WorkerParameters) :
                 Notify.result(applicationContext, "提取失败", outcome.reason, ok = false)
                 Result.success() // 业务失败也是"任务完成"，无需系统重试
             }
+            is ExtractRepository.Outcome.StillProcessing -> {
+                // 长视频超出客户端等待窗口：服务端仍在跑，勿谎报失败
+                Notify.result(
+                    applicationContext,
+                    "仍在处理中",
+                    "这条视频内容较长，稍后打开 App 在列表查看结果",
+                    ok = false,
+                )
+                Result.success()
+            }
         }
     }
 

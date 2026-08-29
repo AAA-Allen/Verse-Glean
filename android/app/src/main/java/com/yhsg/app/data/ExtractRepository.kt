@@ -11,6 +11,8 @@ class ExtractRepository(private val prefs: Prefs) {
     sealed interface Outcome {
         data class Done(val taskId: String, val capsuleId: Long) : Outcome
         data class Failed(val reason: String) : Outcome
+        /** 客户端停止等待，但服务端任务仍在跑，胶囊稍后会出现在列表（勿报"失败"）。 */
+        data object StillProcessing : Outcome
     }
 
     /** 提交并轮询到终态；onStatus 用于 UI 展示中间态。 */
@@ -18,7 +20,9 @@ class ExtractRepository(private val prefs: Prefs) {
         shareText: String,
         onStatus: (suspend (String) -> Unit)? = null,
         pollIntervalMs: Long = 1500,
-        timeoutMs: Long = 120_000,
+        // 长视频（40min+）服务端需 3 分钟以上；8 分钟留给极端情况，仍在
+        // WorkManager 单任务 10 分钟上限内
+        timeoutMs: Long = 480_000,
     ): Outcome {
         val api = ApiClient.service(prefs)
         onStatus?.invoke("提交中…")
@@ -47,7 +51,7 @@ class ExtractRepository(private val prefs: Prefs) {
                 else -> onStatus?.invoke(statusLabel(env.data))
             }
         }
-        return Outcome.Failed("提取超时")
+        return Outcome.StillProcessing
     }
 
     private fun statusLabel(t: TaskData) = when (t.status) {

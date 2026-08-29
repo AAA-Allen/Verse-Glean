@@ -163,8 +163,6 @@ class MainActivity : ComponentActivity() {
                 )
             }) { Text("去授权") }
             Spacer(Modifier.height(8.dp))
-            // 从系统设置返回后重新检测
-            androidx.compose.runtime.saveable.rememberSaveableStateHolder()
             Button(onClick = { onChanged() }) { Text("我已授权，刷新") }
         }
     }

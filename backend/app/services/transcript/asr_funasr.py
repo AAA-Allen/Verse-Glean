@@ -38,7 +38,7 @@ def _download_audio(url: str, out_wav: Path) -> None:
             ["yt-dlp", "-f", "bestaudio", "-o", str(raw), "--no-playlist",
              "--user-agent", UA, "--add-header", "Referer:https://www.bilibili.com",
              url],
-            capture_output=True, timeout=120,
+            capture_output=True, timeout=300,  # 长视频音频可达数十 MB
         )
         size = raw.stat().st_size if raw.exists() else 0
         if dl.returncode != 0 or size < 1024:
@@ -46,7 +46,7 @@ def _download_audio(url: str, out_wav: Path) -> None:
             raise RuntimeError(f"yt-dlp 下载失败（exit={dl.returncode}, size={size}B）: {stderr}")
         subprocess.run(
             ["ffmpeg", "-y", "-i", str(raw), "-ar", "16000", "-ac", "1", str(out_wav)],
-            check=True, capture_output=True, timeout=60,
+            check=True, capture_output=True, timeout=180,
         )
     finally:
         raw.unlink(missing_ok=True)
