@@ -20,7 +20,7 @@ const router = createRouter({
   ],
 })
 
-// C1 登录守卫：M1 单用户 token 存在即放行；M3 换 JWT + 过期刷新
+// C1 登录守卫：无 access token 一律去登录页（401 续期在 http.js 拦截器内完成）
 router.beforeEach((to) => {
   if (to.path !== '/login' && !auth.token) return '/login'
 })

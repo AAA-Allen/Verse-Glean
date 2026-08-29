@@ -236,17 +236,37 @@
 `POST /api/v1/auth/login`
 
 ```json
-{ "username": "liuyupeng", "password": "******" }
+{ "username": "dev", "password": "******" }
 ```
 
 ```json
 {
   "code": 0, "message": "ok",
-  "data": { "access_token": "eyJ…", "refresh_token": "eyJ…", "expires_in": 7200, "user": { "id": 1, "nickname": "刘郁鹏" } }
+  "data": {
+    "access_token": "eyJ…", "refresh_token": "eyJ…", "expires_in": 7200,
+    "user": { "id": 1, "nickname": "dev" }
+  }
 }
 ```
 
-错误：`1002`（凭据错误）、`3001`（连续失败限流）。
+错误：`1002`（凭据错误，不区分用户不存在/密码错误）、`3001`（连续失败限流）。
+
+#### 3.4.2 刷新 token
+
+`POST /api/v1/auth/refresh`
+
+```json
+{ "refresh_token": "eyJ…" }
+```
+
+```json
+{ "code": 0, "message": "ok", "data": { "access_token": "eyJ…", "refresh_token": "eyJ…", "expires_in": 7200 } }
+```
+
+错误：`1002`（refresh token 无效/过期/类型不符）。
+
+> 兼容性：M1 单用户固定 token 在 access token 位置仍然有效（App 旧版兼容期）；
+> JWT 由 HS256 签发，密码 pbkdf2 10 万次迭代存储。
 
 ## 4. 鉴权与安全约束
 

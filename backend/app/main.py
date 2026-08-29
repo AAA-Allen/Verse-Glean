@@ -15,6 +15,16 @@ from app.workers.extraction_runner import recover_stale_tasks
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # 种子账号（dev），供 H5 登录联调；生产改掉 YHSG_BOOTSTRAP_PASSWORD
+    from app.api.routes.auth import ensure_bootstrap_user
+    from app.core.database import SessionLocal as _S
+
+    try:
+        with _S() as db:
+            ensure_bootstrap_user(db)
+    except Exception as exc:  # noqa: BLE001 —— DB 未就绪不阻塞启动
+        logger.error("bootstrap user skipped: {}", exc)
+
     # 启动自愈：上次进程中断留下的中间态任务置 failed（DATABASE.md §4）
     try:
         n = recover_stale_tasks(SessionLocal)

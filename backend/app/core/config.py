@@ -12,6 +12,8 @@ class Settings(BaseSettings):
 
     # 鉴权：M1 单用户固定 token；M3 起换 JWT（见 core/security.py TODO）
     api_token: str = "dev-single-user-token"
+    jwt_secret: str = "dev-jwt-secret-change-in-prod"
+    bootstrap_password: str = "yhsg123456"
 
     database_url: str = "sqlite:///./yhsg.db"
     redis_url: str = "redis://localhost:6379/0"
