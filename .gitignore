@@ -23,7 +23,9 @@ android/local.properties
 android/.idea/
 *.apk
 *.keystore
+*.jks
 !debug.keystore
+keystore.properties
 
 # 环境与密钥（严禁入库）
 .env
