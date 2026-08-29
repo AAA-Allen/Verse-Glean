@@ -9,6 +9,15 @@ data class ExtractionCreate(
     val title: String? = null,
 )
 
+data class ManualRetry(val manual_text: String)
+
+data class CapsuleUpsert(
+    val theme: String? = null,
+    val variables: List<String>? = null,
+    val steps: List<String>? = null,
+    val tags: List<String>? = null,
+)
+
 data class TaskData(
     val task_id: String,
     val status: String,       // pending/resolving/transcribing/extracting/done/failed

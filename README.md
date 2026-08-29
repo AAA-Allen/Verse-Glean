@@ -52,3 +52,16 @@ cd web && npm install && npm run dev
 | 待确认 | AI 解析与算法工程（LLM 接入 / ASR / Embedding） |
 
 指导教师：张雄雄
+
+## Android 真机联调
+
+1. 手机与电脑连**同一 WiFi**；电脑后端跑在 `0.0.0.0:8000`（默认即是）；
+2. 查电脑局域网 IP（`ipconfig`，如 `192.168.1.4`），App「设置」页填 `http://<该IP>:8000`；
+3. 手机安装 APK：`android/app/build/outputs/apk/debug/app-debug.apk`；
+4. 首次启动：授予「显示在其他应用上层」与通知权限 → 启动悬浮球；
+5. 在抖音/B站点「分享 → 影海拾光」即可端到端提取（AC-01）。
+
+注意事项：
+- 本机系统代理会劫持 `localhost`，后端/前端/Ollama 一律用 `127.0.0.1` 直连；
+- Ollama 不是系统服务，重启电脑后先运行 `ollama serve`；
+- B 站对 yt-dlp 默认 UA 风控，已在后端内置浏览器 UA，不要改动。
