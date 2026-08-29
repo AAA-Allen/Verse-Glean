@@ -166,6 +166,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /** 正式版已关闭明文流量：http 地址必然连不上，提前给出解释（第六轮审查 3.1）。 */
+    private fun httpHint(url: String): String? =
+        if (!BuildConfig.DEBUG && url.startsWith("http://")) {
+            "正式版不支持明文 http 连接（安全策略）。请联系服务提供方获取 https 地址，或改用 debug 版联调。"
+        } else null
+
     @Composable
     private fun PermissionGuide(padding: PaddingValues, onChanged: () -> Unit) {
         Column(
@@ -199,11 +205,17 @@ class MainActivity : ComponentActivity() {
             onDismissRequest = onDismiss,
             title = { Text("服务器地址（v$version）") },
             text = {
-                OutlinedTextField(
-                    value = text, onValueChange = { text = it },
-                    label = { Text("http://192.168.x.x:8000") },
-                    singleLine = true,
-                )
+                Column {
+                    OutlinedTextField(
+                        value = text, onValueChange = { text = it },
+                        label = { Text("http://192.168.x.x:8000") },
+                        singleLine = true,
+                    )
+                    httpHint(text)?.let {
+                        Spacer(Modifier.height(8.dp))
+                        Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                    }
+                }
             },
             confirmButton = { TextButton(onClick = { onSave(text) }) { Text("保存") } },
             dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
