@@ -134,7 +134,11 @@ class MainActivity : ComponentActivity() {
         }
 
         if (serverDialog) {
-            ServerDialog(prefs.serverBaseUrl, onDismiss = { serverDialog = false }) { url ->
+            ServerDialog(
+                current = prefs.serverBaseUrl,
+                version = BuildConfig.VERSION_NAME,
+                onDismiss = { serverDialog = false },
+            ) { url ->
                 prefs.serverBaseUrl = url
                 serverDialog = false
                 loadCapsules()
@@ -166,11 +170,16 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun ServerDialog(current: String, onDismiss: () -> Unit, onSave: (String) -> Unit) {
+    private fun ServerDialog(
+        current: String,
+        version: String,
+        onDismiss: () -> Unit,
+        onSave: (String) -> Unit,
+    ) {
         var text by remember { mutableStateOf(current) }
         AlertDialog(
             onDismissRequest = onDismiss,
-            title = { Text("服务器地址") },
+            title = { Text("服务器地址（v$version）") },
             text = {
                 OutlinedTextField(
                     value = text, onValueChange = { text = it },

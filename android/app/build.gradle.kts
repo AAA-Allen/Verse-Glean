@@ -12,8 +12,8 @@ android {
         applicationId = "com.yhsg.app"
         minSdk = 29   // Android 10：剪贴板/音频捕获行为基线（TECHNICAL_DESIGN §4.5）
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2.0-nonblocking"
     }
 
     buildTypes {
@@ -27,7 +27,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions { jvmTarget = "17" }
-    buildFeatures { compose = true }
+    buildFeatures { compose = true; buildConfig = true }
 }
 
 dependencies {
