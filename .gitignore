@@ -49,3 +49,7 @@ logs/
 .DS_Store
 Thumbs.db
 uvicorn.log
+backend/yhsg.db-shm
+backend/yhsg.db-wal
+*.doc
+*.docx
