@@ -1,6 +1,6 @@
 <script setup>
 // C3 3D 知识图谱：3d-force-graph（TECHNICAL_DESIGN 选型：内置力导向，免手写物理引擎）
-import { onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import ForceGraph from '3d-force-graph'
 import http from '../api/http'
@@ -17,6 +17,9 @@ onMounted(async () => {
   loading.value = false
   empty.value = data.nodes.length === 0
   if (empty.value) return
+
+  // 关键：loading 消失后容器 div 在下一个 tick 才挂载，直接取 ref 是 null（实测踩坑）
+  await nextTick()
 
   const graph = ForceGraph()(container.value)
     .nodeLabel((n) => `${n.theme}\n[${CATEGORY_NAMES[n.category] || n.category}]`)
