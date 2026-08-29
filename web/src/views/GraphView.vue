@@ -21,6 +21,11 @@ onMounted(async () => {
   // 关键：loading 消失后容器 div 在下一个 tick 才挂载，直接取 ref 是 null（实测踩坑）
   await nextTick()
 
+  // 接口字段是 edges，3d-force-graph 要的键名是 links；并过滤掉悬空边兜底
+  const nodeIds = new Set(data.nodes.map((n) => n.id))
+  const links = (data.edges || []).filter(
+    (e) => nodeIds.has(e.source) && nodeIds.has(e.target),
+  )
   const graph = ForceGraph()(container.value)
     .nodeLabel((n) => `${n.theme}\n[${CATEGORY_NAMES[n.category] || n.category}]`)
     .nodeColor((n) => CATEGORY_COLORS[n.category] || '#999')
@@ -28,7 +33,7 @@ onMounted(async () => {
     .linkLabel((e) => `相似度 ${e.similarity}`)
     .linkOpacity(0.35)
     .backgroundColor('#000018')
-  graph.graphData(data)
+  graph.graphData({ nodes: data.nodes, links })
   // C3 下钻：点击节点打开胶囊详情（AC-07）
   graph.onNodeClick((n) => router.push(`/capsules/${n.id}`))
 })
