@@ -2,6 +2,8 @@
 import asyncio
 import subprocess
 import tempfile
+import threading
+import time
 from pathlib import Path
 from uuid import uuid4
 
@@ -11,6 +13,10 @@ _ASR_MODEL = None  # 进程内常驻，避免每次冷加载
 
 # B 站对默认 UA 风控 412，必须带浏览器 UA + Referer（2026-08-29 实测）
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+
+# 并发下载会触发 B 站风控（实测 4 连发第 4 发 412），全局串行 + 指数退避重试
+_download_lock = threading.Lock()
+_RETRY_DELAYS = (5, 20)  # 两次重试的退避秒数
 
 
 def _get_model():
@@ -34,16 +40,26 @@ def _download_audio(url: str, out_wav: Path) -> None:
     """
     raw = Path(tempfile.gettempdir()) / f"yhsg_dl_{uuid4().hex}.m4a"
     try:
-        dl = subprocess.run(
-            ["yt-dlp", "-f", "bestaudio", "-o", str(raw), "--no-playlist",
-             "--user-agent", UA, "--add-header", "Referer:https://www.bilibili.com",
-             url],
-            capture_output=True, timeout=300,  # 长视频音频可达数十 MB
-        )
-        size = raw.stat().st_size if raw.exists() else 0
-        if dl.returncode != 0 or size < 1024:
-            stderr = (dl.stderr or b"")[-300:].decode("utf-8", "replace")
-            raise RuntimeError(f"yt-dlp 下载失败（exit={dl.returncode}, size={size}B）: {stderr}")
+        last_err = ""
+        for attempt in range(1 + len(_RETRY_DELAYS)):
+            with _download_lock:  # 串行化：并发的 yt-dlp 请求易被风控 412
+                dl = subprocess.run(
+                    ["yt-dlp", "-f", "bestaudio", "-o", str(raw), "--no-playlist",
+                     "--user-agent", UA, "--add-header", "Referer:https://www.bilibili.com",
+                     url],
+                    capture_output=True, timeout=300,  # 长视频音频可达数十 MB
+                )
+            size = raw.stat().st_size if raw.exists() else 0
+            if dl.returncode == 0 and size >= 1024:
+                break
+            last_err = (dl.stderr or b"")[-300:].decode("utf-8", "replace")
+            raw.unlink(missing_ok=True)  # 清掉可能存在的 0 字节残file再重试
+            if attempt < len(_RETRY_DELAYS):
+                wait = _RETRY_DELAYS[attempt]
+                logger.warning("yt-dlp 第{}次失败，{}s 后重试: {}", attempt + 1, wait, last_err[:120])
+                time.sleep(wait)
+        else:
+            raise RuntimeError(f"yt-dlp 下载失败（重试{len(_RETRY_DELAYS)}次后）: {last_err}")
         subprocess.run(
             ["ffmpeg", "-y", "-i", str(raw), "-ar", "16000", "-ac", "1", str(out_wav)],
             check=True, capture_output=True, timeout=180,
