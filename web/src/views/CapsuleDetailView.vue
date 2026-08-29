@@ -2,6 +2,7 @@
 // C2 胶囊详情/编辑/删除（T3.4，对应 TC-C03、AC-06）
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { showConfirmDialog } from 'vant'
 import http from '../api/http'
 
 const route = useRoute()
@@ -35,6 +36,11 @@ async function save() {
 }
 
 async function remove() {
+  try {
+    await showConfirmDialog({ title: '删除胶囊', message: '删除后不可恢复，确定删除吗？' })
+  } catch {
+    return // 用户取消
+  }
   await http.delete(`/capsules/${capsule.value.id}`)
   router.replace('/')
 }

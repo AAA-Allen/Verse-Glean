@@ -123,19 +123,23 @@ def create_audio_extraction(
     def _asr_then_extract() -> None:
         """先转写（模型推理，CPU 数秒到数十秒），转写文本落库后复用提取状态机。"""
         from app.services.transcript.asr_funasr import transcribe_file
+        from app.workers.extraction_runner import _set_status
 
         s: Session = SessionLocal()
         try:
             v = s.get(Video, video.id)
+            t = s.get(ExtractionTask, task.id)
             try:
                 v.transcript = transcribe_file(wav_path)
                 v.transcript_source = "asr"
                 s.commit()
             except Exception as exc:  # noqa: BLE001
-                from app.workers.extraction_runner import _set_status
-
-                t = s.get(ExtractionTask, task.id)
                 _set_status(s, t, "failed", f"ASR: {exc}"[:512])
+                return
+            if not (v.transcript or "").strip():
+                # 静音/无媒体音：必须在此拦截，否则 runner 会对无 URL 的 capture
+                # 视频再走一次 URL 转写链，报出无关的"手动粘贴文案"错误（实测踩坑）
+                _set_status(s, t, "failed", "未捕获到有效语音：确认目标 App 正在播放媒体音（建议外放）")
                 return
             run_extraction(SessionLocal, task.id)
         finally:

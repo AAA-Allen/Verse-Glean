@@ -49,4 +49,9 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    return Settings()
+    s = Settings()
+    if not s.debug and s.jwt_secret == "dev-jwt-secret-change-in-prod":
+        from loguru import logger
+
+        logger.warning("正在使用仓库默认 JWT 密钥，生产环境必须设置 YHSG_JWT_SECRET（否则任何人可伪造 token）")
+    return s
