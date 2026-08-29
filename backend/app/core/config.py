@@ -26,6 +26,9 @@ class Settings(BaseSettings):
 
     bilibili_sessdata: str = ""
 
+    # 转写策略：默认全走本地 ASR（2026-08 决策）；字幕接口通道保留代码、按需开启
+    transcript_subtitle_enabled: bool = False
+
     similarity_threshold: float = 0.75
     max_manual_text_len: int = 5000
 

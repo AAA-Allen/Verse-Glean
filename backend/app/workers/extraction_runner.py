@@ -38,9 +38,11 @@ def run_extraction(session_factory: sessionmaker, task_id: int) -> None:
             _set_status(db, task, "resolving")
             if video.platform != "manual" and not video.transcript:
                 resolved = await_(_resolve(video))
-                # 平台/BV号以解析结果为准（创建时硬编码 bilibili，见 extractions.create）
+                # 平台/BV号/展开后的真实地址以解析结果为准（创建时只有短链，
+                # 短链域 b23.tv 会被风控/via 代理拦截，转写必须用展开地址）
                 video.platform = resolved.platform
                 video.bvid = resolved.bvid or video.bvid
+                video.source_url = resolved.url or video.source_url
                 video.title = video.title or resolved.title
                 video.cover_url = video.cover_url or resolved.cover_url
                 video.duration_sec = video.duration_sec or resolved.duration_sec

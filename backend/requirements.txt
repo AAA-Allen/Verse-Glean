@@ -9,11 +9,11 @@ cryptography==44.0.2
 httpx==0.28.1
 loguru==0.7.3
 numpy==2.2.5
+# ASR 主通道（本地转写，torch 建议 CPU 版：--index-url https://download.pytorch.org/whl/cpu）
+funasr==1.4.6
+torch==2.12.0+cpu
+torchaudio==2.12.0+cpu
 yt-dlp==2025.6.9
-
-# ASR（本机无环境时可先不装，转写自动降级报错）
-# funasr==1.2.6
-# torch  # 由 funasr 拉起，约 2GB
 
 # dev
 pytest==8.3.5

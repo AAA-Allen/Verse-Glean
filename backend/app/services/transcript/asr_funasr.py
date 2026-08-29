@@ -1,12 +1,16 @@
-"""转写 L2：yt-dlp 抽音频 + FunASR Paraformer-zh 本地转写（中文主通道）。"""
+"""转写主通道：yt-dlp 抽音频 + FunASR Paraformer-zh 本地转写（中文口播）。"""
 import asyncio
 import subprocess
 import tempfile
 from pathlib import Path
+from uuid import uuid4
 
 from loguru import logger
 
 _ASR_MODEL = None  # 进程内常驻，避免每次冷加载
+
+# B 站对默认 UA 风控 412，必须带浏览器 UA + Referer（2026-08-29 实测）
+UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 
 
 def _get_model():
@@ -23,18 +27,29 @@ def _get_model():
 
 
 def _download_audio(url: str, out_wav: Path) -> None:
-    """yt-dlp 取最佳音轨 → ffmpeg 转 16k 单声道 wav（whisper/funasr 友好格式）。"""
-    with tempfile.NamedTemporaryFile(suffix=".m4a", delete=False) as tmp:
-        raw = Path(tmp.name)
-    subprocess.run(
-        ["yt-dlp", "-f", "bestaudio", "-o", str(raw), "--no-playlist", url],
-        check=True, capture_output=True, timeout=120,
-    )
-    subprocess.run(
-        ["ffmpeg", "-y", "-i", str(raw), "-ar", "16000", "-ac", "1", str(out_wav)],
-        check=True, capture_output=True, timeout=60,
-    )
-    raw.unlink(missing_ok=True)
+    """yt-dlp 取最佳音轨 → ffmpeg 转 16k 单声道 wav。
+
+    注意：yt-dlp 的目标文件**不能预先创建**——它看到已存在的文件（哪怕 0 字节）
+    会判定"already been downloaded"直接跳过并返回 0（2026-08-29 实测踩坑）。
+    """
+    raw = Path(tempfile.gettempdir()) / f"yhsg_dl_{uuid4().hex}.m4a"
+    try:
+        dl = subprocess.run(
+            ["yt-dlp", "-f", "bestaudio", "-o", str(raw), "--no-playlist",
+             "--user-agent", UA, "--add-header", "Referer:https://www.bilibili.com",
+             url],
+            capture_output=True, timeout=120,
+        )
+        size = raw.stat().st_size if raw.exists() else 0
+        if dl.returncode != 0 or size < 1024:
+            stderr = (dl.stderr or b"")[-300:].decode("utf-8", "replace")
+            raise RuntimeError(f"yt-dlp 下载失败（exit={dl.returncode}, size={size}B）: {stderr}")
+        subprocess.run(
+            ["ffmpeg", "-y", "-i", str(raw), "-ar", "16000", "-ac", "1", str(out_wav)],
+            check=True, capture_output=True, timeout=60,
+        )
+    finally:
+        raw.unlink(missing_ok=True)
 
 
 def _transcribe_sync(url: str, out_wav: Path) -> str:
