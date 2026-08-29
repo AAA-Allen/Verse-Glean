@@ -25,8 +25,8 @@ class Prefs(context: Context) {
         set(v) = sp.edit().putInt(KEY_BALL_Y, v).apply()
 
     companion object {
-        // 默认指向开发机局域网地址（真机与电脑需同一 WiFi；在 App 设置页可改）
-        const val DEFAULT_SERVER = "http://192.168.1.4:8000"
+        // 占位默认值：克隆后必须在 App「设置」页改成开发机的局域网地址（第七轮审查 2.4）
+        const val DEFAULT_SERVER = "http://192.168.1.100:8000"
         private const val KEY_SERVER = "server_base_url"
         private const val KEY_TOKEN = "api_token"
         private const val KEY_BALL_X = "ball_x"

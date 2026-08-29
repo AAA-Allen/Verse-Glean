@@ -72,6 +72,26 @@ def create_extraction(
             db.add(video)
             db.flush()
 
+    # 幂等（API.md §1 / 第七轮审查 2.1）：同视频已有进行中任务直接返回该任务，
+    # 避免重复跑 LLM（顺序提交）和唯一约束冲突（并发提交）
+    in_progress = (
+        db.query(ExtractionTask)
+        .filter(
+            ExtractionTask.video_id == video.id,
+            ExtractionTask.status.in_(["pending", "resolving", "transcribing", "extracting"]),
+        )
+        .order_by(ExtractionTask.id.desc())
+        .first()
+    )
+    if in_progress:
+        return ok(
+            {
+                "task_id": task_public_id(in_progress.id, in_progress.created_at),
+                "status": in_progress.status,
+                "video_id": video.id,
+            }
+        )
+
     task = ExtractionTask(video_id=video.id, user_id=user.id)
     db.add(task)
     db.commit()
