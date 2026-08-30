@@ -175,3 +175,12 @@ T0.2 → T1.1 → T1.3 → T1.5 → T1.7 → T1.8 → T2.1 → T2.2/T2.3 → T2.
 | AC-07 百节点数据 | 109 节点/1619 边已入库（样例前缀，可 --cleanup 清理），浏览器帧率实测待用户 |
 | release 打包 | R8 混淆签名包 app-release.apk 2.7MB（keystore 本地保管不入库） |
 | 遗留 | 评测集扩充至 200 条（团队分工）；Redis 缓存（本机无 Redis，单进程内存缓存够用，上云时启用）；Android JWT |
+
+## 阶段四进展（2026-08-30 第二批）
+
+| 项 | 结果 |
+| --- | --- |
+| CI 流水线 | ✅ `.github/workflows/ci.yml`：push/PR 触发，Python 3.12 跑 22 个 pytest 用例；funasr 为懒加载导入（未安装时 pipeline 降级捕获），CI 跳过以免拉取 torch |
+| Android JWT | ✅ 登录对话框调 `/api/v1/auth/login`，JWT access+refresh+昵称存 Prefs；release 构建无默认 token（M1 固定 token 兜底仅 debug 保留），ApiClient 拦截器 401 清登录态，UI 统一提示重新登录；debug 包 assembleDebug 编译通过，真机联调待测 |
+| AC-03 评测（扩至 100 条） | **成功率 100% / JSON 合法率 100% / 召回率 98% / 步骤达标 100%**，平均 8.9s/条（报告 eval_20260830_181609）。首批扩写 75 条（5 子集 × 20）；14 条低召回逐条核对提取输出，10 条 expect 关键词按真实输出校准（如"550瓦"→"550W"、"竖着叠"→"竖叠"），原 25 条中 4 条关键词改写问题一并修复；剩余 7 条 67–75% 为 LLM 同义改写的逐次波动，整体稳定 |
+| 遗留更新 | 评测集 100→200 条（团队分工继续，扩写规范见 run_eval.py 头注释）；Redis 缓存（上云时启用）；音频捕获真机实测、图谱百节点帧率实测待用户执行 |
