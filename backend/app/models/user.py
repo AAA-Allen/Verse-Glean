@@ -11,5 +11,5 @@ class User(Base, IdMixin, TimestampMixin):
 
     nickname: Mapped[str] = mapped_column(String(64), nullable=False)
     phone: Mapped[str | None] = mapped_column(String(20), nullable=True, unique=True)
-    # TODO(M3): bcrypt 哈希 + 登录（T3.1）
+    # bcrypt 哈希，登录校验见 core/security.py
     password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)

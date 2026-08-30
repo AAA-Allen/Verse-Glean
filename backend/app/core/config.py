@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     app_name: str = "影海拾光"
     debug: bool = True
 
-    # 鉴权：M1 单用户固定 token；M3 起换 JWT（见 core/security.py TODO）
+    # 鉴权：JWT 为主（见 core/security.py）；api_token 为 M1 旧版 App 的兼容路径
     api_token: str = "dev-single-user-token"
     jwt_secret: str = "dev-jwt-secret-change-in-prod"
     bootstrap_password: str = "yhsg123456"
