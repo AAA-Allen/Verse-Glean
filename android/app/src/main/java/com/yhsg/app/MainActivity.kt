@@ -21,8 +21,11 @@ import com.yhsg.app.data.Prefs
 import com.yhsg.app.network.ApiClient
 import com.yhsg.app.network.CapsuleData
 import com.yhsg.app.network.CapsuleSummary
+import com.yhsg.app.network.LoginBody
 import com.yhsg.app.service.FloatingService
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 
 /**
  * 主界面：权限引导 → 悬浮球开关 → 胶囊列表/详情/编辑 + 服务器设置（T2.6/T2.7 骨架）。
@@ -62,6 +65,9 @@ class MainActivity : ComponentActivity() {
         var selected by remember { mutableStateOf<CapsuleData?>(null) }
         var capsuleList by remember { mutableStateOf<List<CapsuleSummary>>(emptyList()) }
         var serverDialog by remember { mutableStateOf(false) }
+        var loginDialog by remember { mutableStateOf(false) }
+        var confirmLogout by remember { mutableStateOf(false) }
+        var loggedIn by remember { mutableStateOf(prefs.isLoggedIn) }
         val snackbar = remember { SnackbarHostState() }
 
         fun loadCapsules() {
@@ -69,8 +75,24 @@ class MainActivity : ComponentActivity() {
                 runCatching { ApiClient.service(prefs).listCapsules() }
                     .onSuccess { capsuleList = it.data.items }
                     .onFailure {
-                        scope.launch { snackbar.showSnackbar("加载失败：${it.message}（检查设置页服务器地址）") }
+                        scope.launch { snackbar.showSnackbar("加载失败：${errText(it)}") }
                     }
+            }
+        }
+
+        fun doLogin(username: String, password: String, onErr: (String) -> Unit) {
+            scope.launch {
+                runCatching { ApiClient.service(prefs).login(LoginBody(username, password)) }
+                    .onSuccess { env ->
+                        prefs.apiToken = env.data.access_token
+                        prefs.refreshToken = env.data.refresh_token
+                        prefs.nickname = env.data.user.nickname
+                        loggedIn = true
+                        loginDialog = false
+                        snackbar.showSnackbar("欢迎，${env.data.user.nickname}")
+                        loadCapsules()
+                    }
+                    .onFailure { onErr(errText(it)) }
             }
         }
 
@@ -82,6 +104,9 @@ class MainActivity : ComponentActivity() {
                     title = { Text("影海拾光") },
                     actions = {
                         TextButton(onClick = { serverDialog = true }) { Text("设置") }
+                        TextButton(onClick = { if (loggedIn) confirmLogout = true else loginDialog = true }) {
+                            Text(if (loggedIn) "退出" else "登录")
+                        }
                         TextButton(onClick = { loadCapsules() }) { Text("刷新") }
                     }
                 )
@@ -106,7 +131,7 @@ class MainActivity : ComponentActivity() {
                                     )
                                 }
                                     .onSuccess { selected = it.data; loadCapsules() }
-                                    .onFailure { snackbar.showSnackbar("保存失败：${it.message}") }
+                                    .onFailure { snackbar.showSnackbar("保存失败：${errText(it)}") }
                             }
                         },
                     )
@@ -133,7 +158,7 @@ class MainActivity : ComponentActivity() {
                                     scope.launch {
                                         runCatching { ApiClient.service(prefs).getCapsule(item.id) }
                                             .onSuccess { selected = it.data }
-                                            .onFailure { snackbar.showSnackbar("详情加载失败：${it.message}") }
+                                            .onFailure { snackbar.showSnackbar("详情加载失败：${errText(it)}") }
                                     }
                                 },
                                 modifier = Modifier.fillMaxWidth(),
@@ -164,6 +189,37 @@ class MainActivity : ComponentActivity() {
                 loadCapsules()
             }
         }
+
+        if (loginDialog) {
+            LoginDialog(
+                onDismiss = { loginDialog = false },
+                onLogin = { username, password, onErr -> doLogin(username, password, onErr) },
+            )
+        }
+
+        if (confirmLogout) {
+            AlertDialog(
+                onDismissRequest = { confirmLogout = false },
+                title = { Text("退出登录") },
+                text = { Text("确定退出${prefs.nickname.ifEmpty { "当前账号" }}？") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        prefs.logout()
+                        loggedIn = false
+                        confirmLogout = false
+                        capsuleList = emptyList()
+                        loadCapsules()
+                    }) { Text("退出") }
+                },
+                dismissButton = { TextButton(onClick = { confirmLogout = false }) { Text("取消") } },
+            )
+        }
+    }
+
+    /** 401 统一转登录提示（release 未登录 / token 过期）；其余保持原始信息。 */
+    private fun errText(e: Throwable): String = when {
+        e is HttpException && e.code() == 401 -> "未登录或登录已过期，请点右上角「登录」"
+        else -> e.message ?: "网络错误"
     }
 
     /** 正式版已关闭明文流量：http 地址必然连不上，提前给出解释（第六轮审查 3.1）。 */
@@ -171,6 +227,39 @@ class MainActivity : ComponentActivity() {
         if (!BuildConfig.DEBUG && url.startsWith("http://")) {
             "正式版不支持明文 http 连接（安全策略）。请联系服务提供方获取 https 地址，或改用 debug 版联调。"
         } else null
+
+    @Composable
+    private fun LoginDialog(
+        onDismiss: () -> Unit,
+        onLogin: (String, String, (String) -> Unit) -> Unit,
+    ) {
+        var username by remember { mutableStateOf("") }
+        var password by remember { mutableStateOf("") }
+        var err by remember { mutableStateOf<String?>(null) }
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text("登录影海拾光") },
+            text = {
+                Column {
+                    OutlinedTextField(
+                        value = username, onValueChange = { username = it },
+                        label = { Text("用户名") }, singleLine = true,
+                    )
+                    OutlinedTextField(
+                        value = password, onValueChange = { password = it },
+                        label = { Text("密码") }, singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                    )
+                    err?.let {
+                        Spacer(Modifier.height(8.dp))
+                        Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                    }
+                }
+            },
+            confirmButton = { TextButton(onClick = { onLogin(username, password) { err = it } }) { Text("登录") } },
+            dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
+        )
+    }
 
     @Composable
     private fun PermissionGuide(padding: PaddingValues, onChanged: () -> Unit) {

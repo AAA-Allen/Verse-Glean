@@ -34,6 +34,12 @@ object ApiClient {
                             .build()
                     )
                 }
+                .addInterceptor { chain ->
+                    // 401 = token 缺失/过期：清掉本地登录态，由 UI 提示重新登录
+                    val resp = chain.proceed(chain.request())
+                    if (resp.code == 401) prefs.logout()
+                    resp
+                }
                 .addInterceptor(logging)
                 .build()
             val api = Retrofit.Builder()

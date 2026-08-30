@@ -15,6 +15,9 @@ import retrofit2.http.Query
  */
 interface YingHaiApi {
 
+    @POST("api/v1/auth/login")
+    suspend fun login(@Body body: LoginBody): ApiEnvelope<LoginData>
+
     @POST("api/v1/extractions")
     suspend fun createExtraction(@Body body: ExtractionCreate): ApiEnvelope<TaskData>
 

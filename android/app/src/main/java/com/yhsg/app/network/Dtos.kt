@@ -3,6 +3,17 @@ package com.yhsg.app.network
 /** 统一响应 {code, message, data}，code=0 为成功（docs/API.md §1）。 */
 data class ApiEnvelope<T>(val code: Int, val message: String, val data: T)
 
+data class LoginBody(val username: String, val password: String)
+
+data class LoginData(
+    val access_token: String,
+    val refresh_token: String,
+    val expires_in: Long,
+    val user: LoginUser,
+)
+
+data class LoginUser(val id: Long, val nickname: String)
+
 data class ExtractionCreate(
     val share_text: String? = null,
     val manual_text: String? = null,
