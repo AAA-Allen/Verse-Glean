@@ -4,6 +4,7 @@ import com.yhsg.app.network.ApiClient
 import com.yhsg.app.network.ExtractionCreate
 import com.yhsg.app.network.TaskData
 import kotlinx.coroutines.delay
+import retrofit2.HttpException
 
 /** 提取任务的提交与轮询封装，供分享接收/悬浮球共用（AC-01/02 时延埋点也挂在这）。 */
 class ExtractRepository(private val prefs: Prefs) {
@@ -28,6 +29,9 @@ class ExtractRepository(private val prefs: Prefs) {
         onStatus?.invoke("提交中…")
         val created = try {
             api.createExtraction(ExtractionCreate(share_text = shareText))
+        } catch (e: HttpException) {
+            if (e.code() == 401) return Outcome.Failed("未登录或登录已过期，请先打开 App 登录")
+            return Outcome.Failed("提交失败：HTTP ${e.code()}")
         } catch (e: Exception) {
             return Outcome.Failed("网络错误：${e.message}")
         }

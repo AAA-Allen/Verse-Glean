@@ -89,10 +89,12 @@ class MainActivity : ComponentActivity() {
                         prefs.nickname = env.data.user.nickname
                         loggedIn = true
                         loginDialog = false
-                        snackbar.showSnackbar("欢迎，${env.data.user.nickname}")
+                        // showSnackbar 会挂起协程，放独立协程避免拖慢列表刷新
+                        scope.launch { snackbar.showSnackbar("欢迎，${env.data.user.nickname}") }
                         loadCapsules()
                     }
-                    .onFailure { onErr(errText(it)) }
+                    // 登录接口的 401 是密码错误/限流，展示后端的中文 detail 而非"登录已过期"
+                    .onFailure { onErr(if (it is HttpException) errDetail(it) ?: errText(it) else errText(it)) }
             }
         }
 
@@ -220,6 +222,14 @@ class MainActivity : ComponentActivity() {
     private fun errText(e: Throwable): String = when {
         e is HttpException && e.code() == 401 -> "未登录或登录已过期，请点右上角「登录」"
         else -> e.message ?: "网络错误"
+    }
+
+    /** 后端业务错误体 {"detail": "..."} 里的中文提示（登录接口用）。 */
+    private fun errDetail(e: HttpException): String? = try {
+        val body = e.response()?.errorBody()?.string()
+        org.json.JSONObject(body ?: "").optString("detail").ifEmpty { null }
+    } catch (_: Exception) {
+        null
     }
 
     /** 正式版已关闭明文流量：http 地址必然连不上，提前给出解释（第六轮审查 3.1）。 */
