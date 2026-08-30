@@ -2,24 +2,35 @@ package com.yhsg.app.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import com.yhsg.app.BuildConfig
 
-/** 轻量本地配置：服务器地址、悬浮球位置、登录态。 */
+/** 轻量本地配置：服务器地址、悬浮球位置、登录态。token 存加密 prefs（review8 加固）。 */
 class Prefs(context: Context) {
     private val sp: SharedPreferences =
         context.getSharedPreferences("yhsg", Context.MODE_PRIVATE)
+
+    // JWT 等敏感项单独存加密文件；升级前明文存的 token 首次读取时迁移进来
+    private val secure: SharedPreferences = EncryptedSharedPreferences.create(
+        context,
+        "yhsg_secure",
+        MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build(),
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
+    )
 
     var serverBaseUrl: String
         get() = sp.getString(KEY_SERVER, DEFAULT_SERVER) ?: DEFAULT_SERVER
         set(v) = sp.edit().putString(KEY_SERVER, v.trimEnd('/')).apply()
 
     var apiToken: String
-        get() = sp.getString(KEY_TOKEN, null) ?: FALLBACK_TOKEN
-        set(v) = sp.edit().putString(KEY_TOKEN, v).apply()
+        get() = secure.getString(KEY_TOKEN, null) ?: migrateLegacyToken() ?: FALLBACK_TOKEN
+        set(v) = secure.edit().putString(KEY_TOKEN, v).apply()
 
     var refreshToken: String
-        get() = sp.getString(KEY_REFRESH, "") ?: ""
-        set(v) = sp.edit().putString(KEY_REFRESH, v).apply()
+        get() = secure.getString(KEY_REFRESH, "") ?: ""
+        set(v) = secure.edit().putString(KEY_REFRESH, v).apply()
 
     var nickname: String
         get() = sp.getString(KEY_NICKNAME, "") ?: ""
@@ -34,10 +45,20 @@ class Prefs(context: Context) {
         set(v) = sp.edit().putInt(KEY_BALL_Y, v).apply()
 
     /** 是否已通过 JWT 登录（debug 构建的 M1 兜底 token 不算）。 */
-    val isLoggedIn: Boolean get() = sp.contains(KEY_TOKEN)
+    val isLoggedIn: Boolean
+        get() = secure.contains(KEY_TOKEN) || sp.contains(KEY_TOKEN)
 
     fun logout() {
-        sp.edit().remove(KEY_TOKEN).remove(KEY_REFRESH).remove(KEY_NICKNAME).apply()
+        secure.edit().remove(KEY_TOKEN).remove(KEY_REFRESH).apply()
+        // 清掉旧版本可能残留的明文 token
+        sp.edit().remove(KEY_TOKEN).apply()
+    }
+
+    private fun migrateLegacyToken(): String? {
+        val legacy = sp.getString(KEY_TOKEN, null) ?: return null
+        secure.edit().putString(KEY_TOKEN, legacy).apply()
+        sp.edit().remove(KEY_TOKEN).apply()
+        return legacy
     }
 
     companion object {

@@ -71,4 +71,5 @@ dependencies {
     implementation(libs.okhttp.logging)
     implementation(libs.datastore.preferences)
     implementation(libs.androidx.work)
+    implementation(libs.androidx.security.crypto)
 }
